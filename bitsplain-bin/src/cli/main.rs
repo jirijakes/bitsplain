@@ -112,8 +112,8 @@ fn main() {
     let input: Input = args
         .input
         .map(Input::String)
-        .or_else(|| args.file.map(read_file).map(Input::Binary))
-        .unwrap_or_else(|| Input::Binary(read_stdin()));
+        .or_else(|| args.file.map(read_file).map(|b| Input::Binary(b.into())))
+        .unwrap_or_else(|| Input::Binary(read_stdin().into()));
 
     bitsplain::decode::decode_input(input)
         .into_iter()

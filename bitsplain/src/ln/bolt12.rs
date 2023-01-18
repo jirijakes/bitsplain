@@ -1,3 +1,5 @@
+use bytes::Bytes;
+
 use crate::ann::{ann, auto};
 use crate::bitcoin::PublicKey;
 use crate::nom::combinator::success;
@@ -15,7 +17,7 @@ pub enum Offer {
     Description(String),
     Issuer(String),
     Currency(String),
-    Other(Vec<u8>),
+    Other(Bytes),
     PublicKey(PublicKey),
 }
 
@@ -72,7 +74,7 @@ pub fn offer_node_id(s: Span) -> IResult<Span, Offer> {
 
 pub fn other(s: Span) -> IResult<Span, Offer> {
     let (s, bytes) = many0(u8)(s)?;
-    Ok((s, Offer::Other(bytes)))
+    Ok((s, Offer::Other(bytes.into())))
 }
 
 pub fn tlv_record(s: Span) -> IResult<Span, Offer> {

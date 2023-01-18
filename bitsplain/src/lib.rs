@@ -1,5 +1,6 @@
 use annotations::Annotations;
 use binary::Binary;
+use bytes::Bytes;
 use decode::Decoder;
 pub use nom::IResult;
 use parse::Annotated;
@@ -29,7 +30,7 @@ pub enum Input {
 
     /// User provided some binary data (via stdin or file).
     /// The data could be interpreted either as raw or as string.
-    Binary(Vec<u8>),
+    Binary(Bytes),
 }
 
 #[derive(Debug)]
@@ -72,7 +73,7 @@ macro_rules! decoder {
                 symbol: $symbol,
                 decode: |b| {
                     if matches!(b, $( $pattern )|+ $( if $guard )?) {
-                        $func(crate::parse::Annotated::new(b.bytes())).ok().and_then(|(x, _)| {
+                        $func(crate::parse::Annotated::new(&b)).ok().and_then(|(x, _)| {
                             use crate::nom::InputLength;
                             if x.input_len() > 0 {
                                 None

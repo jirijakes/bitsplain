@@ -11,8 +11,10 @@ pub struct Decoder {
     /// Name of data returned by this decoder.
     pub title: &'static str,
 
+    /// Group to which this decode belongs (e. g. 'btc' or 'ln').
     pub group: &'static str,
 
+    /// Simple identifier of the decoder.
     pub symbol: &'static str,
 
     /// Decoding function.

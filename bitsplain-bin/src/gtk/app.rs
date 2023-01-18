@@ -137,7 +137,7 @@ impl SimpleComponent for AppModel {
 
                 if let Some(c) = candidates.into_iter().next() {
                     let annotations = Rc::new(c.annotations);
-                    let bytes = Rc::new(c.data.bytes().to_vec());
+                    let bytes = Rc::new(c.data.to_vec());
 
                     *self = AppModel::Full {
                         annotations: annotations.clone(),
