@@ -6,7 +6,7 @@ use std::rc::Rc;
 use nom::error::ParseError;
 use nom::{AsBytes, IResult, InputIter, InputLength, InputTake, Needed, Offset, Parser, Slice};
 
-use crate::ann::Ann;
+use crate::dsl::Ann;
 use crate::tree::*;
 use crate::value::*;
 use crate::Void;

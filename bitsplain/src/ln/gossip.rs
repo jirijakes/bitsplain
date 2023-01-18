@@ -1,7 +1,7 @@
 use lightning::ln::features::{ChannelFeatures, NodeFeatures};
 use lightning::ln::msgs::*;
 
-use crate::ann::{ann, auto};
+use crate::dsl::{ann, auto};
 use crate::ln::{rgb_color, short_channel_id};
 use crate::nom::combinator::{success, value};
 use crate::nom::multi::length_count;

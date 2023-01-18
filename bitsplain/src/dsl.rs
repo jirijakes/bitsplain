@@ -1,3 +1,5 @@
+//! Domain-specific language for defining annotations.
+
 use std::marker::PhantomData;
 
 use crate::tree::Tag;
