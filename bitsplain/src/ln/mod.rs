@@ -54,12 +54,6 @@ pub struct RgbColor {
     pub blue: u8,
 }
 
-impl RgbColor {
-    pub fn as_slice(&self) -> [u8; 3] {
-        [self.red, self.green, self.blue]
-    }
-}
-
 impl ToValue for RgbColor {
     fn to_value(&self) -> Value {
         Value::Alt(

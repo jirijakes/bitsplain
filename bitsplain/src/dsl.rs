@@ -98,19 +98,25 @@ impl<T> From<&'static str> for Make<T, String> {
     }
 }
 
-// impl<T, F> From<F> for Make<T, String>
-// where
-//     F: Fn(&T) -> String + 'static,
-// {
-//     fn from(f: F) -> Self {
-//         Make::Fn(Box::new(f))
-//     }
-// }
+impl<T> From<String> for Make<T, String> {
+    fn from(s: String) -> Self {
+        Make::Static(s)
+    }
+}
+
+/// External reference attached to an annotation.
+pub enum Reference {
+    /// Reference to a web page.
+    Www(String),
+    // Code,
+}
 
 pub struct Ann<T> {
     pub label: String,
     pub value: Make<T, Value>,
     pub doc: Option<String>,
+    /// External references.
+    pub refs: Vec<Reference>,
     pub tags: Vec<Make<T, Tag>>,
     pub splain: Make<T, String>,
 }
@@ -123,6 +129,12 @@ impl<T> Ann<T> {
 
     pub fn doc(mut self, s: impl AsRef<str>) -> Ann<T> {
         self.doc = Some(s.as_ref().to_string());
+        self
+    }
+
+    /// Add reference to a web page; may be called repeatedly.
+    pub fn www(mut self, s: impl AsRef<str>) -> Ann<T> {
+        self.refs.push(Reference::Www(s.as_ref().into()));
         self
     }
 
@@ -157,6 +169,7 @@ pub fn ann<T>(label: impl AsRef<str>, value: impl Into<Make<T, Value>>) -> Ann<T
         label: label.as_ref().to_string(),
         value: value.into(),
         tags: vec![],
+        refs: vec![],
         doc: None,
         splain: Make::Empty,
     }

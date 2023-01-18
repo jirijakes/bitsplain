@@ -387,10 +387,6 @@ where
     }
 }
 
-pub enum P<Output> {
-    Ann(Ann<Output>),
-}
-
 pub fn parse<Parse, Error, Output, Fragment>(
     mut parse: Parse,
     ann: Ann<Output>,

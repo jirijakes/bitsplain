@@ -108,7 +108,7 @@ pub fn pretty_tree(t: &Tree, ctx: &Ctx) -> RcDoc<'static, ColorSpec> {
         .append(pretty_doc(&information.splain, ctx)),
 
         Tree::Leaf(Leaf::Virtual(VirtualLeaf { path, information })) => RcDoc::text(format!(
-            "{}{}{}{}",
+            "{}{}({}){}",
             style::Bold,
             style::Faint,
             information.annotation,

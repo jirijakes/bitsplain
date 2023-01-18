@@ -119,7 +119,11 @@ fn main() {
         .into_iter()
         .take(1)
         .for_each(|a| {
-            let header = RcDoc::text(a.decoder.title);
+            let header = RcDoc::line()
+                .append(RcDoc::text(a.decoder.title))
+                .append(RcDoc::line())
+                .append(RcDoc::text("=".repeat(a.decoder.title.len())))
+                .append(RcDoc::line());
             let doc = a
                 .annotations
                 .iter()
