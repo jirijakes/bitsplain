@@ -1,7 +1,7 @@
 //! Core types and functions related to decoding of binary data.
 
-use crate::annotations::Annotations;
 use crate::binary::*;
+use crate::tree::Annotations;
 use crate::{Candidate, Input};
 
 /// Description of a function that can decode data. During program's

@@ -1,6 +1,5 @@
 use std::rc::Rc;
 
-use bitsplain::annotations::Annotations;
 use bitsplain::tree::*;
 use gtk::prelude::*;
 use lazy_static::lazy_static;

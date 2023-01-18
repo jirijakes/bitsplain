@@ -1,7 +1,6 @@
 use std::convert::identity;
 use std::rc::Rc;
 
-use bitsplain::annotations::Annotations;
 use bitsplain::tree::*;
 use bitsplain::Input;
 use gtk::glib::clone;

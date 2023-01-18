@@ -1,14 +1,13 @@
-use annotations::Annotations;
 use binary::Binary;
 use bytes::Bytes;
 use decode::Decoder;
 pub use nom::IResult;
 use parse::Annotated;
 use time::OffsetDateTime;
+use tree::Annotations;
 pub use {bitcoin, hex, nom};
 
 pub mod ann;
-pub mod annotations;
 pub mod binary;
 pub mod decode;
 pub mod lines;

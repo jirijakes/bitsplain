@@ -1,7 +1,6 @@
 use std::rc::Rc;
 
-use bitsplain::annotations::Annotations;
-use bitsplain::*;
+use bitsplain::tree::Annotations;
 use gtk::prelude::*;
 use relm4::*;
 

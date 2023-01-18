@@ -7,7 +7,6 @@ use nom::error::ParseError;
 use nom::{AsBytes, IResult, InputIter, InputLength, InputTake, Needed, Offset, Parser, Slice};
 
 use crate::ann::Ann;
-use crate::annotations::*;
 use crate::tree::*;
 use crate::value::*;
 use crate::Void;
@@ -64,6 +63,7 @@ pub struct Annotated<Fragment> {
     last_range: Option<(usize, usize)>,
     /// Additional data that parsers can provide.
     data: HashMap<&'static str, String>,
+    /// Tags.
     tags: Vec<Tag>,
     /// Additional annotations that parsers can insert.
     appendices: Rc<RefCell<Vec<Appendix>>>,
@@ -218,7 +218,7 @@ impl<Fragment> Annotated<Fragment> {
                 children
                     .iter_mut()
                     .enumerate()
-                    .for_each(|(en, mut c)| Self::bake_annotations(&mut c, en));
+                    .for_each(|(en, c)| Self::bake_annotations(c, en));
             }
         }
     }
@@ -227,8 +227,7 @@ impl<Fragment> Annotated<Fragment> {
     pub fn annotations(self) -> Annotations {
         let mut tree = Self::inject_appendices(self.tree, &self.appendices.as_ref().borrow());
         Self::inject_paths(&mut tree, vec![]);
-        tree.iter_mut()
-            .for_each(|mut t| Self::bake_annotations(&mut t, 0));
+        tree.iter_mut().for_each(|t| Self::bake_annotations(t, 0));
         Annotations(tree)
     }
 }
