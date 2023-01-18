@@ -57,7 +57,7 @@ impl ToValue for ChainHash {
     fn to_value(&self) -> Value {
         Value::Alt(
             Box::new(Value::Hash(self.block_hash.as_hash())),
-            Box::new(Value::String(self.as_string())),
+            Box::new(Value::text(self.as_string())),
         )
     }
 }

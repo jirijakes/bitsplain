@@ -1,8 +1,11 @@
+use std::fmt::Display;
+
 use bitcoin::{
     hashes::{hex::ToHex, sha256d},
     secp256k1::ecdsa::Signature,
     Address, BlockHash, PublicKey, Script, Txid,
 };
+use bytes::Bytes;
 use time::OffsetDateTime;
 
 use crate::types::Sat;
@@ -19,7 +22,7 @@ pub enum Value {
     Size(u64),
 
     /// Any arbitrary byte array.
-    Bytes(Vec<u8>),
+    Bytes(Bytes),
 
     /// Bitcoin script.
     Script(Script),
@@ -29,9 +32,6 @@ pub enum Value {
 
     /// ECDSA public key
     PublicKey(PublicKey),
-
-    /// Text.
-    String(String),
 
     /// Formatted text.
     Text {
@@ -43,6 +43,7 @@ pub enum Value {
     /// Hash (block hash, txid etc.).
     Hash(sha256d::Hash),
 
+    /// Any sort of timestamp.x
     Timestamp(time::OffsetDateTime),
 
     /// Alternative values.
@@ -56,6 +57,60 @@ pub enum Value {
 }
 
 impl Value {
+    /// Creates alternative from two distinct values.
+    #[inline]
+    pub fn alt(v1: Value, v2: Value) -> Value {
+        Value::Alt(Box::new(v1), Box::new(v2))
+    }
+
+    /// Creates value from bytes.
+    #[inline]
+    pub fn bytes<I: Into<Bytes>>(bytes: I) -> Value {
+        Value::Bytes(bytes.into())
+    }
+
+    /// Creates textual value from anything that has [`Display`].
+    #[inline]
+    pub fn display<S: Display>(value: S) -> Value {
+        Self::text(value.to_string())
+    }
+
+    /// Creates formatted textual value from anything that has [`Display`].
+    #[inline]
+    pub fn display_fmt<S: Display>(
+        value: S,
+        foreground: Option<[u8; 3]>,
+        background: Option<[u8; 3]>,
+    ) -> Value {
+        Self::text_fmt(value.to_string(), foreground, background)
+    }
+
+    /// Creates textual value.
+    #[inline]
+    pub fn text<S: AsRef<str>>(text: S) -> Value {
+        Value::Text {
+            text: text.as_ref().to_string(),
+            foreground: None,
+            background: None,
+        }
+    }
+
+    /// Creates formatted textual value.
+    #[inline]
+    pub fn text_fmt<S: AsRef<str>>(
+        text: S,
+        foreground: Option<[u8; 3]>,
+        background: Option<[u8; 3]>,
+    ) -> Value {
+        Value::Text {
+            text: text.as_ref().to_string(),
+            foreground,
+            background,
+        }
+    }
+}
+
+impl Value {
     pub fn preview(&self) -> String {
         match self {
             Value::Addr(a) => format!("{:?}", a),
@@ -65,7 +120,6 @@ impl Value {
             Value::Script(s) => s.to_string(),
             Value::Signature(s) => s.serialize_compact().to_hex(),
             Value::PublicKey(k) => k.to_string(),
-            Value::String(s) => s.to_string(),
             Value::Text { text, .. } => text.to_string(),
             Value::Hash(id) => id.to_string(),
             Value::Alt(v1, v2) => format!("{}/{}", v1.preview(), v2.preview()),
@@ -118,7 +172,7 @@ impl ToValue for PublicKey {
 
 impl ToValue for BlockHash {
     fn to_value(&self) -> Value {
-        Value::Bytes(self.as_hash().to_vec())
+        Value::bytes(self.as_hash().to_vec())
     }
 }
 
@@ -136,13 +190,13 @@ impl ToValue for u64 {
 
 impl ToValue for &[u8] {
     fn to_value(&self) -> Value {
-        Value::Bytes(self.to_vec())
+        Value::bytes(self.to_vec())
     }
 }
 
 impl ToValue for &str {
     fn to_value(&self) -> Value {
-        Value::String(self.to_string())
+        Value::text(self)
     }
 }
 

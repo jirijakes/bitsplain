@@ -13,8 +13,8 @@ pub fn payment_code(s: Span) -> IResult<Span, ()> {
         ann(
             "Prefix",
             Value::Alt(
-                Box::new(Value::Bytes(vec![0x47])),
-                Box::new(Value::String("P".to_string())),
+                Box::new(Value::bytes(vec![0x47])),
+                Box::new(Value::text("P")),
             ),
         ),
     )(s)?;
@@ -25,7 +25,7 @@ pub fn payment_code(s: Span) -> IResult<Span, ()> {
     let (s, _chain) = p(chain_hash_le, ann("Chain code", auto()))(s)?;
     let (s, _reserved) = p(
         bytes(13usize),
-        ann("Reserved for future", |b: &Vec<_>| Value::Bytes(b.clone())),
+        ann("Reserved for future", |b: &Vec<_>| Value::bytes(b.clone())),
     )(s)?;
 
     Ok((s, ()))

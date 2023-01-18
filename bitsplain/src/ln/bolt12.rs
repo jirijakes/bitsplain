@@ -1,12 +1,12 @@
 use crate::ann::ann;
 use crate::ann::auto;
 use crate::bitcoin::PublicKey;
-use crate::types::*;
 use crate::nom::combinator::success;
 use crate::nom::multi::{length_value, many0};
 use crate::nom::number::complete::*;
 use crate::nom::IResult;
 use crate::parse::*;
+use crate::types::*;
 use crate::value::{ToValue, Value};
 use crate::Span;
 
@@ -24,10 +24,10 @@ impl ToValue for Offer {
     fn to_value(&self) -> Value {
         match self {
             Offer::ChainHash(s) => s.to_value(),
-            Offer::Description(s) => Value::String(s.to_string()),
-            Offer::Issuer(s) => Value::String(s.to_string()),
-            Offer::Currency(s) => Value::String(s.to_string()),
-            Offer::Other(b) => Value::Bytes(b.to_vec()),
+            Offer::Description(s) => Value::text(s),
+            Offer::Issuer(s) => Value::text(s),
+            Offer::Currency(s) => Value::text(s),
+            Offer::Other(b) => Value::bytes(b.to_vec()),
             Offer::PublicKey(pk) => pk.to_value(),
         }
     }

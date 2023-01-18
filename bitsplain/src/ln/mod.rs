@@ -35,7 +35,7 @@ impl From<ShortChannelId> for u64 {
 
 impl ToValue for ShortChannelId {
     fn to_value(&self) -> value::Value {
-        Value::String(self.as_string())
+        Value::text(self.as_string())
     }
 }
 
@@ -63,15 +63,15 @@ impl RgbColor {
 impl ToValue for RgbColor {
     fn to_value(&self) -> Value {
         Value::Alt(
-            Box::new(Value::String(format!(
+            Box::new(Value::text(format!(
                 "#{:02x}{:02x}{:02x}",
                 self.red, self.green, self.blue
             ))),
-            Box::new(Value::Text {
-                text: "  ".to_string(),
-                foreground: None,
-                background: Some([self.red, self.green, self.blue]),
-            }),
+            Box::new(Value::text_fmt(
+                "  ",
+                None,
+                Some([self.red, self.green, self.blue]),
+            )),
         )
     }
 }

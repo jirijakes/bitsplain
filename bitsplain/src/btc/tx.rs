@@ -2,7 +2,6 @@ use crate::ann::ann;
 use crate::ann::auto;
 use crate::bitcoin::*;
 use crate::btc::datatypes::*;
-use crate::types::*;
 use crate::nom::combinator::peek;
 use crate::nom::multi::length_count;
 use crate::nom::multi::many_m_n;
@@ -11,6 +10,7 @@ use crate::nom::number::complete::be_u8;
 use crate::nom::IResult;
 use crate::parse::*;
 use crate::tree::Tag;
+use crate::types::*;
 use crate::value::*;
 use crate::Span;
 
@@ -105,17 +105,14 @@ pub fn tx_in(input: Span) -> IResult<Span, TxIn> {
     let (s, out) = p(
         out_point,
         ann("out_point", |o: &OutPoint| {
-            Value::String(format!("{:?}:{}", o.txid, o.vout))
+            Value::text(format!("{:?}:{}", o.txid, o.vout))
         }),
     )(input)?;
     let (s, scr) = p(script, ann("script", Value::Nil))(s)?;
     let (s, (seq, _)) = p(
         alt(uint32, bytes(4u32)),
         ann("Sequence", |(s, bin): &(u32, Vec<u8>)| {
-            Value::Alt(
-                Box::new(Value::Num(*s as i128)),
-                Box::new(Value::Bytes(bin.clone())),
-            )
+            Value::alt(Value::Num(*s as i128), Value::bytes(bin.clone()))
         }),
     )(s)?;
     Ok((

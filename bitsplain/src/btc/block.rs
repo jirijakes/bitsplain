@@ -2,8 +2,8 @@ use bitcoin::*;
 
 use crate::ann::ann;
 use crate::ann::auto;
-use crate::types::*;
 use crate::parse::*;
+use crate::types::*;
 use crate::value::Value;
 use crate::*;
 
@@ -33,11 +33,8 @@ pub fn block_header(s: Span) -> IResult<Span, BlockHeader> {
         ));
     };
 
-    s.insert(ann(
-        "Target",
-        Value::String(block_header.target().to_string()),
-    ));
-    s.insert(ann("Work", Value::String(block_header.work().to_string())));
+    s.insert(ann("Target", Value::display(block_header.target())));
+    s.insert(ann("Work", Value::display(block_header.work())));
 
     Ok((s, block_header))
 }

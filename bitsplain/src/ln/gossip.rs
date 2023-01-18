@@ -1,10 +1,10 @@
 use crate::ann::{ann, auto};
-use crate::types::*;
 use crate::nom::combinator::{success, value};
 use crate::nom::multi::length_count;
 use crate::nom::number::complete::*;
 use crate::nom::IResult;
 use crate::parse::*;
+use crate::types::*;
 use crate::value::Value;
 use crate::Span;
 use lightning::ln::features::{ChannelFeatures, NodeFeatures};
@@ -35,7 +35,7 @@ pub fn node_announcement(s: Span) -> IResult<Span, ()> {
 
     let (s, features) = p(
         length_count(success(len), u8),
-        ann("Features", |b: &Vec<u8>| Value::Bytes(b.clone())),
+        ann("Features", |b: &Vec<u8>| Value::bytes(b.clone())),
     )(s)?;
 
     let _features = NodeFeatures::from_le_bytes({
@@ -50,11 +50,7 @@ pub fn node_announcement(s: Span) -> IResult<Span, ()> {
     let (s, _alias) = p(
         bytes(32usize),
         ann("Alias", |b: &Vec<u8>| {
-            Value::String(
-                String::from_utf8_lossy(b)
-                    .trim_end_matches('\0')
-                    .to_string(),
-            )
+            Value::text(String::from_utf8_lossy(b).trim_end_matches('\0'))
         }),
     )(s)?;
     let (s, addr_len) = p(be_u16, ann("Addresses length", auto()))(s)?;
@@ -94,7 +90,7 @@ pub fn channel_announcement(s: Span) -> IResult<Span, ()> {
 
     let (s, features) = p(
         length_count(success(len), u8),
-        ann("Features", |b: &Vec<u8>| Value::Bytes(b.to_vec())),
+        ann("Features", |b: &Vec<u8>| Value::bytes(b.to_vec())),
     )(s)?;
 
     let _features = ChannelFeatures::from_le_bytes({

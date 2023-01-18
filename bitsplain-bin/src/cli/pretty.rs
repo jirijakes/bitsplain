@@ -148,7 +148,6 @@ fn pretty_value(value: &Value, ctx: &Ctx) -> RcDoc<'static, ColorSpec> {
         Value::Bytes(h) => pretty_hex(h, ctx),
         Value::Nil => RcDoc::nil(),
         Value::Script(s) => pretty_script(s),
-        Value::String(s) => RcDoc::as_string(s),
         Value::Timestamp(ts) => RcDoc::text(format!(
             "{}{}{}",
             color::Fg(color::Yellow),

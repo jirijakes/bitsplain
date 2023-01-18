@@ -67,7 +67,7 @@ impl<T> Make<T, String> {
 
 impl<T> From<&'static str> for Make<T, Value> {
     fn from(s: &'static str) -> Self {
-        Make::Static(Value::String(s.to_string()))
+        Make::Static(Value::text(s))
     }
 }
 
