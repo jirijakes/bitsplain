@@ -1,0 +1,23 @@
+[format]
+default = 'pretty'
+
+[format.pretty]
+use_color = true
+
+[format.pretty.doc]
+show = true
+foreground = "lightblack"
+style = ["italic"]
+
+[format.pretty.ids]
+show = true
+style = []
+
+[format.pretty.hex]
+show = true
+style = []
+
+[format.pretty.tag]
+show = true
+foreground = "lightblack"
+style = ["invert"]

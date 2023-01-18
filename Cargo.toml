@@ -1,0 +1,10 @@
+[workspace]
+members = [
+	"bitsplain-lib",
+	"bitsplain-core",
+	"bitsplain-gtk",
+	# "bitsplain-nom",
+	"bitsplain-btc",
+	"bitsplain-ln",
+	"bitsplain-cli"
+]

@@ -1,0 +1,36 @@
+.hex {
+    font-family: monospace;
+    font-size: 12pt;
+    font-feature-settings: "tnum";
+    line-height: 18pt;
+}
+
+.hex #view {
+    padding: 6px 12px 0 12px;
+    color: @theme_fg_color;
+    background-color: @theme_bg_color;
+    /* letter-spacing: 2px; */
+}
+
+.hex #view text {
+    background-color: @theme_bg_color;
+}
+
+.hex #offsets {
+    padding: 6px 12px 0 12px;
+    background-color: shade(@theme_bg_color, 0.8);
+    /* background-color: @insensitive_bg_color; */
+    border-right: solid @borders 2px;
+    /* color: @insensitive_fg_color; */
+    color: alpha(@theme_fg_color, 0.7);
+}
+
+.hex #offsets text {
+    background-color: shade(@theme_bg_color, 0.8);
+}
+
+
+.mini {
+    font-size: 6pt;
+    color: yellow;
+}

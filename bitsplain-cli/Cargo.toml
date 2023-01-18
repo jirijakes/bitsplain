@@ -1,0 +1,15 @@
+[package]
+name = "bitsplain-cli"
+version = "0.1.0-alpha.1"
+edition = "2021"
+
+[dependencies]
+bitsplain-lib = { version = "0.1.0-alpha.1", path = "../bitsplain-lib" }
+clap = { version = "4.1.1", features = ["derive"] }
+config = "0.13.3"
+dirs = "4.0.0"
+human-size = "0.4.2"
+pretty = { version = "0.11.3", features = ["termcolor"] }
+print_bytes = "1.1.0"
+serde = { version = "1.0.152", features = ["derive"] }
+termion = "2.0.1"

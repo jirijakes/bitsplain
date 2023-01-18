@@ -1,0 +1,15 @@
+.label {
+    /* color: grey; */
+    font-size: 0.9em;
+    font-variant-caps: all-small-caps;
+    /* text-align: right; */
+    /* background-color: yellow; */
+    color: alpha(@theme_fg_color, 0.7);
+}
+
+.value {
+    /* width: 40%; */
+    /* background-color: orange; */
+    /* background-color: yellow; */
+}
+
