@@ -1,20 +1,19 @@
-use bitsplain_core::ann::ann;
-use bitsplain_core::ann::auto;
-use bitsplain_core::basic::*;
-use bitsplain_core::bitcoin::*;
-use bitsplain_core::datatypes::Sat;
-use bitsplain_core::nom::combinator::peek;
-use bitsplain_core::nom::multi::length_count;
-use bitsplain_core::nom::multi::many_m_n;
-use bitsplain_core::nom::number::complete::be_u16;
-use bitsplain_core::nom::number::complete::be_u8;
-use bitsplain_core::nom::IResult;
-use bitsplain_core::parse::*;
-use bitsplain_core::tree::Tag;
-use bitsplain_core::value::*;
-use bitsplain_core::Span;
-
-use crate::datatypes::*;
+use crate::ann::ann;
+use crate::ann::auto;
+use crate::basic::*;
+use crate::bitcoin::*;
+use crate::btc::datatypes::*;
+use crate::datatypes::Sat;
+use crate::nom::combinator::peek;
+use crate::nom::multi::length_count;
+use crate::nom::multi::many_m_n;
+use crate::nom::number::complete::be_u16;
+use crate::nom::number::complete::be_u8;
+use crate::nom::IResult;
+use crate::parse::*;
+use crate::tree::Tag;
+use crate::value::*;
+use crate::Span;
 
 pub fn out_point(s: Span) -> IResult<Span, OutPoint> {
     let (s, txid) = p(

@@ -1,11 +1,11 @@
 use bitcoin::*;
 
-use bitsplain_core::ann::ann;
-use bitsplain_core::ann::auto;
-use bitsplain_core::basic::*;
-use bitsplain_core::parse::*;
-use bitsplain_core::value::Value;
-use bitsplain_core::*;
+use crate::ann::ann;
+use crate::ann::auto;
+use crate::basic::*;
+use crate::parse::*;
+use crate::value::Value;
+use crate::*;
 
 pub fn block_header(s: Span) -> IResult<Span, BlockHeader> {
     let (s, version) = p(int32, ann("Version", auto()))(s)?;

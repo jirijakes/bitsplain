@@ -1,10 +1,10 @@
-use bitsplain_core::ann::*;
-use bitsplain_core::basic::*;
-use bitsplain_core::bitcoin::Script;
-use bitsplain_core::nom::IResult;
-use bitsplain_core::parse::*;
-use bitsplain_core::value::Value;
-use bitsplain_core::Span;
+use crate::ann::*;
+use crate::basic::*;
+use crate::bitcoin::Script;
+use crate::nom::IResult;
+use crate::parse::*;
+use crate::value::Value;
+use crate::Span;
 
 pub fn script(input: Span) -> IResult<Span, Script> {
     let (s, len) = p(varint, ann("script_len", auto()))(input)?;

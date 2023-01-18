@@ -7,9 +7,9 @@ use nom::error::ParseError;
 use nom::{AsBytes, IResult, InputIter, InputLength, InputTake, Needed, Offset, Parser, Slice};
 
 use crate::ann::Ann;
-use crate::tree::*;
+use crate::annotations::*;
 use crate::value::*;
-use crate::*;
+use crate::{tree::*, Void};
 
 /// Pointer to a location in parsed data.
 ///
@@ -75,7 +75,7 @@ impl<Fragment> Annotated<Fragment> {
     }
 
     /// Insert an annotation at the bookmark's position.
-    pub fn insert_at(&self, bookmark: &Bookmark, ann: Ann<!>) {
+    pub fn insert_at(&self, bookmark: &Bookmark, ann: Ann<Void>) {
         if let Some((from, to)) = bookmark.0 {
             self.appendices.borrow_mut().push(Appendix {
                 from,
@@ -118,7 +118,7 @@ impl<Fragment> Annotated<Fragment> {
     /// Insert an annotation to current position.
     ///
     /// To insert annotations to a previous position, see [`insert_at`].
-    pub fn insert(&self, ann: Ann<!>) {
+    pub fn insert(&self, ann: Ann<Void>) {
         if let Some((from, to)) = self.last_range {
             self.appendices.borrow_mut().push(Appendix {
                 from,

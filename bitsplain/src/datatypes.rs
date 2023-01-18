@@ -1,5 +1,6 @@
 use crate::basic::bytes;
-use crate::{value::*, *};
+use crate::value::*;
+use crate::*;
 use bitcoin::blockdata::constants::genesis_block;
 use bitcoin::hashes::Hash;
 use bitcoin::{BlockHash, Network};

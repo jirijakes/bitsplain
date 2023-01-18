@@ -1,12 +1,12 @@
-use bitsplain_core::ann::{ann, auto};
-use bitsplain_core::basic::*;
-use bitsplain_core::nom::combinator::value;
-use bitsplain_core::nom::number::complete::*;
-use bitsplain_core::parse::*;
-use bitsplain_core::value::Value;
-use bitsplain_core::*;
+use crate::ann::{ann, auto};
+use crate::basic::*;
+use crate::nom::combinator::value;
+use crate::nom::number::complete::*;
+use crate::parse::*;
+use crate::value::Value;
+use crate::*;
 
-use bitsplain_core::datatypes::*;
+use crate::datatypes::*;
 
 pub fn payment_code(s: Span) -> IResult<Span, ()> {
     let (s, _) = p(

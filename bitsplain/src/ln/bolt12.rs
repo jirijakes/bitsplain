@@ -1,15 +1,15 @@
-use bitsplain_core::ann::ann;
-use bitsplain_core::ann::auto;
-use bitsplain_core::basic::*;
-use bitsplain_core::bitcoin::PublicKey;
-use bitsplain_core::datatypes::*;
-use bitsplain_core::nom::combinator::success;
-use bitsplain_core::nom::multi::{length_value, many0};
-use bitsplain_core::nom::number::complete::*;
-use bitsplain_core::nom::IResult;
-use bitsplain_core::parse::*;
-use bitsplain_core::value::{ToValue, Value};
-use bitsplain_core::Span;
+use crate::ann::ann;
+use crate::ann::auto;
+use crate::basic::*;
+use crate::bitcoin::PublicKey;
+use crate::datatypes::*;
+use crate::nom::combinator::success;
+use crate::nom::multi::{length_value, many0};
+use crate::nom::number::complete::*;
+use crate::nom::IResult;
+use crate::parse::*;
+use crate::value::{ToValue, Value};
+use crate::Span;
 
 #[derive(Debug, Clone)]
 pub enum Offer {

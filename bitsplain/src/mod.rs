@@ -1,16 +1,5 @@
 #![feature(never_type)]
 
-use annotations::Annotations;
-use binary::Binary;
-use decode::Decoder;
-use parse::Annotated;
-use time::OffsetDateTime;
-
-pub use bitcoin;
-pub use hex;
-pub use nom;
-pub use nom::IResult;
-
 pub mod ann;
 pub mod annotations;
 pub mod basic;
@@ -21,6 +10,12 @@ pub mod lines;
 pub mod parse;
 pub mod tree;
 pub mod value;
+
+use annotations::Annotations;
+use binary::Binary;
+use decode::Decoder;
+use parse::Annotated;
+use time::OffsetDateTime;
 
 pub type Span<'a> = Annotated<&'a [u8]>;
 
