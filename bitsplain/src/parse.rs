@@ -389,21 +389,9 @@ where
 
 pub enum P<Output> {
     Ann(Ann<Output>),
-    Xxx,
 }
 
-pub fn xxx<Parse, Error, Output, Fragment>(
-    mut parse: Parse,
-    p: P<Output>,
-) -> impl FnMut(Annotated<Fragment>) -> IResult<Annotated<Fragment>, Output, Error>
-where
-    Parse: Parser<Annotated<Fragment>, Output, Error>,
-    Error: ParseError<Annotated<Fragment>>,
-{
-    move |input: Annotated<Fragment>| parse.parse(input)
-}
-
-pub fn p<Parse, Error, Output, Fragment>(
+pub fn parse<Parse, Error, Output, Fragment>(
     mut parse: Parse,
     ann: Ann<Output>,
 ) -> impl FnMut(Annotated<Fragment>) -> IResult<Annotated<Fragment>, Output, Error>
@@ -501,7 +489,7 @@ mod tests {
     use nom::combinator::success;
     use nom::number::complete::{be_u16, be_u8};
 
-    use super::{p, Annotated};
+    use super::{parse, Annotated};
 
     type TestResult = Result<(), nom::Err<nom::error::Error<Annotated<&'static [u8], String>>>>;
 
@@ -515,7 +503,7 @@ mod tests {
         assert_eq!(span.last_range, None);
         assert!(span.appendices.borrow().is_empty());
 
-        let (span, value) = p("One byte", |s| s.to_string(), be_u8)(span)?;
+        let (span, value) = parse("One byte", |s| s.to_string(), be_u8)(span)?;
 
         let first = {
             let sp = span.intervals.borrow();
@@ -543,7 +531,7 @@ mod tests {
         assert_eq!(span.last_range, Some((0, 1)));
         assert!(span.appendices.borrow().is_empty());
 
-        let (span, value) = p("Two bytes", |s| s.to_string(), be_u16)(span)?;
+        let (span, value) = parse("Two bytes", |s| s.to_string(), be_u16)(span)?;
 
         {
             let sp = span.intervals.borrow();
@@ -586,7 +574,7 @@ mod tests {
         // assert!(span.appendices.borrow().is_empty());
         // assert!(span.intervals.borrow().is_empty());
 
-        let (span, value) = p("One byte", |s| s.to_string(), be_u8)(span)?;
+        let (span, value) = parse("One byte", |s| s.to_string(), be_u8)(span)?;
         println!("1 #### {:#?}", span);
 
         let first = {
@@ -615,7 +603,7 @@ mod tests {
         // assert_eq!(span.last_range, Some((0, 1)));
         // assert!(span.appendices.borrow().is_empty());
 
-        let (span, value) = p("Zero byte", |s| s.to_string(), success(123u16))(span)?;
+        let (span, value) = parse("Zero byte", |s| s.to_string(), success(123u16))(span)?;
         println!("2 #### {:#?}", span);
 
         {
@@ -645,7 +633,7 @@ mod tests {
         // assert_eq!(span.last_range, Some((1, 3)));
         // assert!(span.appendices.borrow().is_empty());
 
-        let (span, value) = p("Two bytes", |s| s.to_string(), be_u16)(span)?;
+        let (span, value) = parse("Two bytes", |s| s.to_string(), be_u16)(span)?;
         println!("3 #### {:#?}", span);
 
         {

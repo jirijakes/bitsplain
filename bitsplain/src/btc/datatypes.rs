@@ -1,5 +1,5 @@
-use crate::dsl::*;
 use crate::bitcoin::Script;
+use crate::dsl::*;
 use crate::nom::IResult;
 use crate::parse::*;
 use crate::types::*;
@@ -7,8 +7,8 @@ use crate::value::Value;
 use crate::Span;
 
 pub fn script(input: Span) -> IResult<Span, Script> {
-    let (s, len) = p(varint, ann("script_len", auto()))(input)?;
-    let (s, x) = p(
+    let (s, len) = parse(varint, ann("script_len", auto()))(input)?;
+    let (s, x) = parse(
         bytes(len),
         ann("script data", |b: &Vec<_>| Value::bytes(b.to_vec())),
     )(s)?;

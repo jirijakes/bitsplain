@@ -1,6 +1,6 @@
-use crate::dsl::{ann, auto};
 use crate::bitcoin::*;
 use crate::btc::datatypes::*;
+use crate::dsl::{ann, auto};
 use crate::nom::combinator::peek;
 use crate::nom::multi::{length_count, many_m_n};
 use crate::nom::number::complete::{be_u16, be_u8};
@@ -12,12 +12,12 @@ use crate::value::*;
 use crate::Span;
 
 pub fn out_point(s: Span) -> IResult<Span, OutPoint> {
-    let (s, txid) = p(
+    let (s, txid) = parse(
         txid,
         ann("Previous transaction", auto())
             .doc("ID of transaction, which contains this input as one of its outputs"),
     )(s)?;
-    let (s, vout) = p(
+    let (s, vout) = parse(
         uint32,
         ann("Output", auto())
             .doc("Zero-based index pointing to the specific output of previous transaction, which is this input"),
@@ -26,12 +26,12 @@ pub fn out_point(s: Span) -> IResult<Span, OutPoint> {
 }
 
 pub fn tx_out(s: Span) -> IResult<Span, TxOut> {
-    let (s, value) = p(
+    let (s, value) = parse(
         sat,
         ann("Amount", auto()).doc("Amount of BTC being transfered in this output"),
     )(s)?;
     let bm = s.bookmark();
-    let (s, script) = p(script, ann("Script", Value::Nil))(s)?;
+    let (s, script) = parse(script, ann("Script", Value::Nil))(s)?;
 
     //    s.insert_before(
     s.insert_at(
@@ -75,38 +75,38 @@ pub fn tx_out(s: Span) -> IResult<Span, TxOut> {
 }
 
 pub fn tx_outs(input: Span) -> IResult<Span, Vec<TxOut>> {
-    let (s, vout_n) = p(
+    let (s, vout_n) = parse(
         varint,
         ann("Outputs", auto()).doc("Number of outputs of this transaction"),
     )(input)?;
     many_m_n(
         vout_n as usize,
         vout_n as usize,
-        p(with("list", "enumerate", tx_out), ann("vout", Value::Nil)),
+        parse(with("list", "enumerate", tx_out), ann("vout", Value::Nil)),
     )(s)
 }
 
 pub fn tx_ins(input: Span) -> IResult<Span, Vec<TxIn>> {
-    let (s, vin_n) = p(
+    let (s, vin_n) = parse(
         varint,
         ann("vin_n", auto()).doc("Number of inputs participating in this transaction"),
     )(input)?;
     many_m_n(
         vin_n as usize,
         vin_n as usize,
-        p(with("list", "enumerate", tx_in), ann("vin", Value::Nil)),
+        parse(with("list", "enumerate", tx_in), ann("vin", Value::Nil)),
     )(s)
 }
 
 pub fn tx_in(input: Span) -> IResult<Span, TxIn> {
-    let (s, out) = p(
+    let (s, out) = parse(
         out_point,
         ann("out_point", |o: &OutPoint| {
             Value::text(format!("{:?}:{}", o.txid, o.vout))
         }),
     )(input)?;
-    let (s, scr) = p(script, ann("script", Value::Nil))(s)?;
-    let (s, (seq, _)) = p(
+    let (s, scr) = parse(script, ann("script", Value::Nil))(s)?;
+    let (s, (seq, _)) = parse(
         alt(uint32, bytes(4u32)),
         ann("Sequence", |(s, bin): &(u32, Vec<u8>)| {
             Value::alt(Value::Num(*s as i128), Value::bytes(bin.clone()))
@@ -126,7 +126,7 @@ pub fn tx_in(input: Span) -> IResult<Span, TxIn> {
 /// Parse Bitcoin transaction.
 pub fn tx(s: Span) -> IResult<Span, Transaction> {
     // let bm1 = s.bookmark();
-    let (s, version) = p(
+    let (s, version) = parse(
         int32,
         ann("Version", auto())
             .doc("Version, haha")
@@ -139,16 +139,16 @@ pub fn tx(s: Span) -> IResult<Span, Transaction> {
     )(s)?;
     let (s, flags) = peek(be_u16)(s)?;
     let (s, flags) = if flags == 1 {
-        p(be_u16, ann("Flags", auto()))(s)?
+        parse(be_u16, ann("Flags", auto()))(s)?
     } else {
         (s, 0)
     };
     let bm2 = s.bookmark();
-    let (s, vin) = p(tx_ins, ann("Vins", Value::Nil))(s)?;
-    let (s, vout) = p(tx_outs, ann("Vouts", Value::Nil))(s)?;
+    let (s, vin) = parse(tx_ins, ann("Vins", Value::Nil))(s)?;
+    let (s, vout) = parse(tx_outs, ann("Vouts", Value::Nil))(s)?;
 
     let (s, _witnesses) = if flags == 1 {
-        p(
+        parse(
             length_count(varint, length_count(varint, be_u8)),
             ann("Witnesses", "Witness data"),
         )(s)?
@@ -156,7 +156,7 @@ pub fn tx(s: Span) -> IResult<Span, Transaction> {
         (s, vec![])
     };
 
-    let (s, locktime) = p(uint32, ann("Locktime", auto()))(s)?;
+    let (s, locktime) = parse(uint32, ann("Locktime", auto()))(s)?;
 
     let total = vout.iter().fold(0, |acc, v| acc + v.value);
     let tx = Transaction {

@@ -7,12 +7,12 @@ use crate::value::Value;
 use crate::*;
 
 pub fn block_header(s: Span) -> IResult<Span, BlockHeader> {
-    let (s, version) = p(int32, ann("Version", auto()))(s)?;
-    let (s, prev_blockhash) = p(sha256d, ann("Previous block hash", auto()))(s)?;
-    let (s, merkle_root) = p(sha256d, ann("Merkle root", auto()))(s)?;
-    let (s, time) = p(timestamp(uint32), ann("Timestamp", auto()))(s)?;
-    let (s, bits) = p(uint32, ann("Bits", auto()))(s)?;
-    let (s, nonce) = p(uint32, ann("Nonce", auto()))(s)?;
+    let (s, version) = parse(int32, ann("Version", auto()))(s)?;
+    let (s, prev_blockhash) = parse(sha256d, ann("Previous block hash", auto()))(s)?;
+    let (s, merkle_root) = parse(sha256d, ann("Merkle root", auto()))(s)?;
+    let (s, time) = parse(timestamp(uint32), ann("Timestamp", auto()))(s)?;
+    let (s, bits) = parse(uint32, ann("Bits", auto()))(s)?;
+    let (s, nonce) = parse(uint32, ann("Nonce", auto()))(s)?;
 
     let block_header = BlockHeader {
         version,

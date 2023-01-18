@@ -41,9 +41,9 @@ impl ToValue for ShortChannelId {
 
 /// Parser of short channel ID (SCID). Reads 8 bytes.
 pub fn short_channel_id(s: Span) -> IResult<Span, ShortChannelId> {
-    let (s, block) = p(be_u24, ann("Block height", auto()))(s)?;
-    let (s, tx) = p(be_u24, ann("Transaction index", auto()))(s)?;
-    let (s, output) = p(be_u16, ann("Output index", auto()))(s)?;
+    let (s, block) = parse(be_u24, ann("Block height", auto()))(s)?;
+    let (s, tx) = parse(be_u24, ann("Transaction index", auto()))(s)?;
+    let (s, output) = parse(be_u16, ann("Output index", auto()))(s)?;
 
     Ok((s, ShortChannelId { block, tx, output }))
 }
@@ -77,9 +77,9 @@ impl ToValue for RgbColor {
 }
 
 pub fn rgb_color(s: Span) -> IResult<Span, RgbColor> {
-    let (s, red) = p(u8, ann("Red", auto()))(s)?;
-    let (s, green) = p(u8, ann("Green", auto()))(s)?;
-    let (s, blue) = p(u8, ann("Blue", auto()))(s)?;
+    let (s, red) = parse(u8, ann("Red", auto()))(s)?;
+    let (s, green) = parse(u8, ann("Green", auto()))(s)?;
+    let (s, blue) = parse(u8, ann("Blue", auto()))(s)?;
 
     Ok((s, RgbColor { red, green, blue }))
 }

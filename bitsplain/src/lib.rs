@@ -7,9 +7,9 @@ use time::OffsetDateTime;
 use tree::Annotations;
 pub use {bitcoin, hex, nom};
 
-pub mod dsl;
 pub mod binary;
 pub mod decode;
+pub mod dsl;
 pub mod lines;
 pub mod parse;
 pub mod tree;

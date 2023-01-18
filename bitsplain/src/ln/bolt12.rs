@@ -1,7 +1,7 @@
 use bytes::Bytes;
 
-use crate::dsl::{ann, auto};
 use crate::bitcoin::PublicKey;
+use crate::dsl::{ann, auto};
 use crate::nom::combinator::success;
 use crate::nom::multi::{length_value, many0};
 use crate::nom::number::complete::*;
@@ -78,9 +78,9 @@ pub fn other(s: Span) -> IResult<Span, Offer> {
 }
 
 pub fn tlv_record(s: Span) -> IResult<Span, Offer> {
-    let (s, typ) = p(u8, ann("Type", auto()))(s)?;
-    let (s, length) = p(u8, ann("Length", auto()))(s)?;
-    let (s, value) = p(
+    let (s, typ) = parse(u8, ann("Type", auto()))(s)?;
+    let (s, length) = parse(u8, ann("Length", auto()))(s)?;
+    let (s, value) = parse(
         length_value(
             success(length),
             match typ {
@@ -112,8 +112,8 @@ pub fn tlv_record(s: Span) -> IResult<Span, Offer> {
 }
 
 pub fn bolt12(s: Span) -> IResult<Span, String> {
-    let (s, records) = p(
-        many0(p(tlv_record, ann("TLV Record", Value::Nil))),
+    let (s, records) = parse(
+        many0(parse(tlv_record, ann("TLV Record", Value::Nil))),
         ann("TLV Stream", Value::Nil),
     )(s)?;
 
