@@ -1,9 +1,7 @@
 use std::marker::PhantomData;
 
-use crate::{
-    tree::Tag,
-    value::{ToValue, Value},
-};
+use crate::tree::Tag;
+use crate::value::{ToValue, Value};
 
 /// Represents a function that can create a [`Value`] out of `T`.
 ///

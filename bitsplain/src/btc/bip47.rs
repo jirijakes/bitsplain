@@ -2,10 +2,9 @@ use crate::ann::{ann, auto};
 use crate::nom::combinator::value;
 use crate::nom::number::complete::*;
 use crate::parse::*;
+use crate::types::*;
 use crate::value::Value;
 use crate::*;
-
-use crate::types::*;
 
 pub fn payment_code(s: Span) -> IResult<Span, ()> {
     let (s, _) = p(

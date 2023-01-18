@@ -4,10 +4,9 @@ use std::rc::Rc;
 use bitsplain::annotations::Annotations;
 use bitsplain::tree::*;
 use bitsplain::Input;
-use gtk::gdk;
-use gtk::gio;
 use gtk::glib::clone;
 use gtk::prelude::*;
+use gtk::{gdk, gio};
 use relm4::actions::{AccelsPlus, RelmAction, RelmActionGroup};
 use relm4::prelude::*;
 

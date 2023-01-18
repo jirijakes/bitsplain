@@ -1,12 +1,9 @@
-use crate::ann::ann;
-use crate::ann::auto;
+use crate::ann::{ann, auto};
 use crate::bitcoin::*;
 use crate::btc::datatypes::*;
 use crate::nom::combinator::peek;
-use crate::nom::multi::length_count;
-use crate::nom::multi::many_m_n;
-use crate::nom::number::complete::be_u16;
-use crate::nom::number::complete::be_u8;
+use crate::nom::multi::{length_count, many_m_n};
+use crate::nom::number::complete::{be_u16, be_u8};
 use crate::nom::IResult;
 use crate::parse::*;
 use crate::tree::Tag;

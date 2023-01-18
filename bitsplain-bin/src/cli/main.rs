@@ -1,8 +1,7 @@
 use std::io::Read;
 use std::path::PathBuf;
 
-use ::pretty::termcolor::ColorChoice;
-use ::pretty::termcolor::StandardStream;
+use ::pretty::termcolor::{ColorChoice, StandardStream};
 use ::pretty::RcDoc;
 use bitsplain::*;
 use clap::Parser;

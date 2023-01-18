@@ -1,15 +1,16 @@
 use std::fmt::Display;
 
-use bitcoin::{
-    hashes::{hex::ToHex, sha256d},
-    secp256k1::ecdsa::Signature,
-    Address, BlockHash, PublicKey, Script, Txid,
-};
+use bitcoin::hashes::hex::ToHex;
+use bitcoin::hashes::sha256d;
+use bitcoin::secp256k1::ecdsa::Signature;
+use bitcoin::{Address, BlockHash, PublicKey, Script, Txid};
 use bytes::Bytes;
 use time::OffsetDateTime;
 
 use crate::types::Sat;
 
+/// Set of primitive values that can be formatted depending on the context.
+/// Parsing any binary data will result in a [`Tree`] of these values.
 #[derive(Clone, Debug)]
 pub enum Value {
     /// Bitcoin address.

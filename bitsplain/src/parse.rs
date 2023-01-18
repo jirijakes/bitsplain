@@ -8,8 +8,9 @@ use nom::{AsBytes, IResult, InputIter, InputLength, InputTake, Needed, Offset, P
 
 use crate::ann::Ann;
 use crate::annotations::*;
+use crate::tree::*;
 use crate::value::*;
-use crate::{tree::*, Void};
+use crate::Void;
 
 /// Pointer to a location in parsed data.
 ///
@@ -498,10 +499,8 @@ where
 
 #[cfg(test)]
 mod tests {
-    use nom::{
-        combinator::success,
-        number::complete::{be_u16, be_u8},
-    };
+    use nom::combinator::success;
+    use nom::number::complete::{be_u16, be_u8};
 
     use super::{p, Annotated};
 

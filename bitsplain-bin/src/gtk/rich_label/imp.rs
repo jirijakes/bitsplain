@@ -1,13 +1,11 @@
 use std::cell::RefCell;
 
-use gtk::gdk;
-use gtk::glib;
 use gtk::glib::clone;
 use gtk::prelude::WidgetExt;
 use gtk::subclass::prelude::*;
-use relm4::gtk;
+use gtk::{gdk, glib};
 use relm4::gtk::traits::BoxExt;
-use relm4::RelmRemoveAllExt;
+use relm4::{gtk, RelmRemoveAllExt};
 
 use crate::tag::Tag;
 

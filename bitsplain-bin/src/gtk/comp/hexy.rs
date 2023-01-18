@@ -3,7 +3,6 @@ use std::rc::Rc;
 use bitsplain::annotations::Annotations;
 use bitsplain::*;
 use gtk::prelude::*;
-
 use relm4::*;
 
 use crate::hexy::HexyLook;

@@ -1,16 +1,13 @@
-use bitsplain::bitcoin::blockdata::opcodes::Class;
-use bitsplain::bitcoin::blockdata::opcodes::ClassifyContext;
 use bitsplain::bitcoin::blockdata::opcodes::Ordinary::*;
+use bitsplain::bitcoin::blockdata::opcodes::{Class, ClassifyContext};
 use bitsplain::bitcoin::blockdata::script::*;
 use bitsplain::tree::*;
 use bitsplain::value::*;
 use bitsplain::*;
-use human_size::Byte;
-use human_size::SpecificSize;
+use human_size::{Byte, SpecificSize};
 use pretty::termcolor::*;
 use pretty::RcDoc;
-use termion::color;
-use termion::style;
+use termion::{color, style};
 
 use crate::ctx::*;
 

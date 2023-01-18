@@ -1,4 +1,8 @@
+use lightning::ln::features::{ChannelFeatures, NodeFeatures};
+use lightning::ln::msgs::*;
+
 use crate::ann::{ann, auto};
+use crate::ln::{rgb_color, short_channel_id};
 use crate::nom::combinator::{success, value};
 use crate::nom::multi::length_count;
 use crate::nom::number::complete::*;
@@ -7,10 +11,6 @@ use crate::parse::*;
 use crate::types::*;
 use crate::value::Value;
 use crate::Span;
-use lightning::ln::features::{ChannelFeatures, NodeFeatures};
-use lightning::ln::msgs::*;
-
-use crate::ln::{rgb_color, short_channel_id};
 
 pub fn gossip_timestamp_filter(s: Span) -> IResult<Span, GossipTimestampFilter> {
     let (s, _) = value(265, be_u16)(s)?;

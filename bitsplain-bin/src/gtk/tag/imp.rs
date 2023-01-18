@@ -1,10 +1,9 @@
 use std::cell::RefCell;
 
-use gtk::gdk;
-use gtk::glib;
 use gtk::glib::clone;
 use gtk::prelude::WidgetExt;
 use gtk::subclass::prelude::*;
+use gtk::{gdk, glib};
 use relm4::gtk;
 use relm4::gtk::traits::BoxExt;
 

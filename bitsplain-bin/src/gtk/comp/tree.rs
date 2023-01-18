@@ -1,11 +1,13 @@
+use std::rc::Rc;
+
 use bitsplain::annotations::Annotations;
 use bitsplain::tree::*;
 use gtk::prelude::*;
 use lazy_static::lazy_static;
 use relm4::prelude::*;
-use std::rc::Rc;
 
-use crate::{app::AppMsg, rich_label::RichLabel};
+use crate::app::AppMsg;
+use crate::rich_label::RichLabel;
 
 #[derive(Clone, Debug)]
 struct Row {

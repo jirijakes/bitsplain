@@ -1,18 +1,17 @@
-use crate::parse::with;
-use crate::value::*;
-use crate::*;
-
 use bitcoin::blockdata::constants::genesis_block;
 use bitcoin::hashes::{sha256d, Hash};
 use bitcoin::secp256k1::ecdsa::Signature;
-use bitcoin::{BlockHash, Network};
-use bitcoin::{PublicKey, Txid};
+use bitcoin::{BlockHash, Network, PublicKey, Txid};
 use nom::combinator::success;
 use nom::multi::length_count;
 use nom::number::streaming::*;
 use nom::{IResult, Parser, ToUsize};
 use rust_decimal::prelude::*;
 use time::OffsetDateTime;
+
+use crate::parse::with;
+use crate::value::*;
+use crate::*;
 
 #[derive(Clone, Copy, Debug)]
 pub struct Sat(Decimal);

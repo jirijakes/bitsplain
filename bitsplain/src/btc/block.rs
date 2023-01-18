@@ -1,7 +1,6 @@
 use bitcoin::*;
 
-use crate::ann::ann;
-use crate::ann::auto;
+use crate::ann::{ann, auto};
 use crate::parse::*;
 use crate::types::*;
 use crate::value::Value;

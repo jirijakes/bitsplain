@@ -1,12 +1,12 @@
-use gtk::gdk;
-use gtk::glib;
+use std::cell::{Cell, RefCell};
+use std::collections::HashMap;
+
 use gtk::glib::clone;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
+use gtk::{gdk, glib};
 use lazy_static::lazy_static;
 use relm4::gtk;
-use std::cell::{Cell, RefCell};
-use std::collections::HashMap;
 
 #[derive(Debug, PartialEq, Eq)]
 struct Highlighted(u32, u32);
