@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::ops::Deref;
 
 use crate::lines::Lines;
 use crate::value::Value;
@@ -100,9 +101,14 @@ impl Tree {
 }
 
 #[derive(Debug)]
-pub struct Annotations(pub Vec<Tree>);
+pub struct Annotations(Vec<Tree>);
 
 impl Annotations {
+    #[inline]
+    pub fn from_trees(trees: Vec<Tree>) -> Annotations {
+        Annotations(trees)
+    }
+
     pub fn leaves(&self) -> Vec<&RealLeaf> {
         Self::tree_leaves(&self.0)
     }
@@ -144,5 +150,13 @@ impl Annotations {
                 // Tree::Virtual { .. } => None,
             }
         }
+    }
+}
+
+impl Deref for Annotations {
+    type Target = [Tree];
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }

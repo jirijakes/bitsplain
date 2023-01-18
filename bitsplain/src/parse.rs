@@ -228,7 +228,7 @@ impl<Fragment> Annotated<Fragment> {
         let mut tree = Self::inject_appendices(self.tree, &self.appendices.as_ref().borrow());
         Self::inject_paths(&mut tree, vec![]);
         tree.iter_mut().for_each(|t| Self::bake_annotations(t, 0));
-        Annotations(tree)
+        Annotations::from_trees(tree)
     }
 }
 

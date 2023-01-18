@@ -111,7 +111,7 @@ impl Component for TreeModel {
     fn update(&mut self, msg: Self::Input, sender: ComponentSender<Self>, tree: &Self::Root) {
         match msg {
             TreeMsg::Open { annotations } => {
-                let root = tree_to_model(&annotations.0);
+                let root = tree_to_model(&annotations);
                 let tree_list_model = gtk::TreeListModel::new(&root, false, true, get_children);
                 let selection = gtk::SingleSelection::builder()
                     .model(&tree_list_model)

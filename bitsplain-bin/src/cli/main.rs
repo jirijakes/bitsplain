@@ -122,7 +122,6 @@ fn main() {
             let header = RcDoc::text(a.decoder.title);
             let doc = a
                 .annotations
-                .0
                 .iter()
                 .fold(header, |doc, t| {
                     doc.append(RcDoc::line())
