@@ -1,6 +1,6 @@
 use crate::ann::*;
-use crate::basic::*;
 use crate::bitcoin::Script;
+use crate::types::*;
 use crate::nom::IResult;
 use crate::parse::*;
 use crate::value::Value;

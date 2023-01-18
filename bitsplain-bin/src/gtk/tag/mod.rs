@@ -13,8 +13,8 @@ glib::wrapper! {
 impl Tag {
     pub fn new(tag: &str) -> Self {
         let obj: Self = glib::Object::new(&[]);
-	obj.set_tag(tag);
-	obj
+        obj.set_tag(tag);
+        obj
     }
 
     pub fn set_tag(&self, text: &str) {

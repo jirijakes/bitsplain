@@ -1,6 +1,5 @@
 use crate::ann::{ann, auto};
-use crate::basic::*;
-use crate::datatypes::chain_hash;
+use crate::types::*;
 use crate::nom::combinator::{success, value};
 use crate::nom::multi::length_count;
 use crate::nom::number::complete::*;

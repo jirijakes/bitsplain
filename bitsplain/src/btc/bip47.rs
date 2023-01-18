@@ -1,12 +1,11 @@
 use crate::ann::{ann, auto};
-use crate::basic::*;
 use crate::nom::combinator::value;
 use crate::nom::number::complete::*;
 use crate::parse::*;
 use crate::value::Value;
 use crate::*;
 
-use crate::datatypes::*;
+use crate::types::*;
 
 pub fn payment_code(s: Span) -> IResult<Span, ()> {
     let (s, _) = p(

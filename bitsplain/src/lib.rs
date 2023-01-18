@@ -11,9 +11,8 @@ pub use nom::IResult;
 
 pub mod ann;
 pub mod annotations;
-pub mod basic;
 pub mod binary;
-pub mod datatypes;
+pub mod types;
 pub mod decode;
 pub mod lines;
 pub mod parse;
@@ -57,37 +56,37 @@ pub enum Void {}
 #[rustfmt::skip]
 macro_rules! decoder {
     (
-	title = $title: literal,
-	group = $group: literal,
-	symbol = $symbol: literal,
-	$func: path $(,)?) => {
-	decoder!(title = $title, group = $group, symbol = $symbol, $func, _);
+        title = $title: literal,
+        group = $group: literal,
+        symbol = $symbol: literal,
+        $func: path $(,)?) => {
+        decoder!(title = $title, group = $group, symbol = $symbol, $func, _);
     };
     (
-	title = $title: literal,
-	group = $group: literal,
-	symbol = $symbol: literal,
-	$func: path,
-	$(|)? $( $pattern:pat_param )|+ $( if $guard: expr )? $(,)?) => {
+        title = $title: literal,
+        group = $group: literal,
+        symbol = $symbol: literal,
+        $func: path,
+        $(|)? $( $pattern:pat_param )|+ $( if $guard: expr )? $(,)?) => {
         inventory::submit! {
             crate::decode::Decoder {
-		title: $title,
-		group: $group,
-		symbol: $symbol,
-		decode: |b| {
-		    if matches!(b, $( $pattern )|+ $( if $guard )?) {
-			$func(crate::parse::Annotated::new(b.bytes())).ok().and_then(|(x, _)| {
-			    use crate::nom::InputLength;
-			    if x.input_len() > 0 {
-				None
-			    } else {
-				Some(x.annotations())
-			    }
-			})
-		    } else {
-			None
-		    }
-		}
+                title: $title,
+                group: $group,
+                symbol: $symbol,
+                decode: |b| {
+                    if matches!(b, $( $pattern )|+ $( if $guard )?) {
+                        $func(crate::parse::Annotated::new(b.bytes())).ok().and_then(|(x, _)| {
+                            use crate::nom::InputLength;
+                            if x.input_len() > 0 {
+                                None
+                            } else {
+                                Some(x.annotations())
+                            }
+                        })
+                    } else {
+                        None
+                    }
+                }
             }
         }
     };

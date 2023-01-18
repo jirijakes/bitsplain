@@ -1,6 +1,6 @@
+use crate::ann::{ann, auto};
 use crate::nom::number::complete::{be_u16, be_u24, u8};
 use crate::parse::*;
-use crate::ann::{ann, auto};
 use crate::value::{ToValue, Value};
 use crate::*;
 

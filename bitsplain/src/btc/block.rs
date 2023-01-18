@@ -2,7 +2,7 @@ use bitcoin::*;
 
 use crate::ann::ann;
 use crate::ann::auto;
-use crate::basic::*;
+use crate::types::*;
 use crate::parse::*;
 use crate::value::Value;
 use crate::*;

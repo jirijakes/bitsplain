@@ -5,7 +5,7 @@ use bitcoin::{
 };
 use time::OffsetDateTime;
 
-use crate::datatypes::Sat;
+use crate::types::Sat;
 
 #[derive(Clone, Debug)]
 pub enum Value {

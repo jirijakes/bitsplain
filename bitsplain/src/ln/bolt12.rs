@@ -1,8 +1,7 @@
 use crate::ann::ann;
 use crate::ann::auto;
-use crate::basic::*;
 use crate::bitcoin::PublicKey;
-use crate::datatypes::*;
+use crate::types::*;
 use crate::nom::combinator::success;
 use crate::nom::multi::{length_value, many0};
 use crate::nom::number::complete::*;
