@@ -12,7 +12,7 @@
 //!
 //! Calling `bitsplain::decode::decode_input(input)` will return a vector of [`candidates`](crate::decode::Candidate).
 //! Each of the candidates contains reference to [`decoder`](crate::decode::Decoder) which successfully
-//! parsed the data, the [`annotations`](crate::tree::Annotations) and view over original binary data.
+//! parsed the data, the [`tree`](crate::tree::Tree) of annotations and view over original binary data.
 //!
 //! ## How it works?
 //!

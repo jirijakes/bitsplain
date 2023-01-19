@@ -2,8 +2,10 @@
 name = "bitsplain"
 version = "0.1.0-alpha.1"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+license = "Apache-2.0 OR MIT"
+repository = "https://jirijakes.com/code/bitsplain"
+description = "Bitsplain helps understand Bitcoin-related binary data"
+keywords = ["bitcoin", "binary", "parsing"]
 
 [dependencies]
 base64 = "0.21.0"

@@ -6,7 +6,7 @@ use std::ops::Deref;
 
 use crate::value::Value;
 
-/// Tree of [`Values`](crate::value).
+/// Node in the [`Tree`] of [`Values`](crate::value).
 #[derive(Debug, Clone)]
 pub enum Node {
     Group {
@@ -157,6 +157,7 @@ pub enum Leaf {
     Virtual(VirtualLeaf),
 }
 
+/// Tree of annotations.
 #[derive(Debug)]
 pub struct Tree(Vec<Node>);
 
