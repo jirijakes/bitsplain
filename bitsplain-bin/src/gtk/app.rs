@@ -20,7 +20,7 @@ pub enum AppModel {
         hexy: Rc<Controller<HexyModel>>,
     },
     Full {
-        annotations: Rc<Annotations>,
+        annotations: Rc<Tree>,
         doc: Rc<Controller<DocModel>>,
         tree: Rc<Controller<TreeModel>>,
         hexy: Rc<Controller<HexyModel>>,
@@ -157,11 +157,11 @@ impl SimpleComponent for AppModel {
                 } = self
                 {
                     match annotations.select(&path) {
-                        Some(Tree::Group { location, .. }) => self.hexy().emit(HexyMsg::Select(
+                        Some(Node::Group { location, .. }) => self.hexy().emit(HexyMsg::Select(
                             location.index_from as u32,
                             location.index_to as u32,
                         )),
-                        Some(Tree::Leaf(Leaf::Real(RealLeaf {
+                        Some(Node::Leaf(Leaf::Real(RealLeaf {
                             location,
                             information,
                             ..
@@ -176,7 +176,7 @@ impl SimpleComponent for AppModel {
                                 location.index as u32,
                             ));
                         }
-                        Some(Tree::Leaf(Leaf::Virtual(VirtualLeaf { information, .. }))) => {
+                        Some(Node::Leaf(Leaf::Virtual(VirtualLeaf { information, .. }))) => {
                             self.doc().emit(DocMsg::T(None, information.clone()));
                             self.hexy().emit(HexyMsg::Unselect);
                         }

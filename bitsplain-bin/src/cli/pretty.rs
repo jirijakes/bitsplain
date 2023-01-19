@@ -12,9 +12,9 @@ use time::OffsetDateTime;
 
 use crate::ctx::*;
 
-pub fn pretty_tree(t: &Tree, ctx: &Ctx) -> RcDoc<'static, ColorSpec> {
+pub fn pretty_tree(t: &Node, ctx: &Ctx) -> RcDoc<'static, ColorSpec> {
     match t {
-        Tree::Group {
+        Node::Group {
             path,
             location,
             information,
@@ -66,7 +66,7 @@ pub fn pretty_tree(t: &Tree, ctx: &Ctx) -> RcDoc<'static, ColorSpec> {
         ))
         .nest(4),
 
-        Tree::Leaf(Leaf::Real(RealLeaf {
+        Node::Leaf(Leaf::Real(RealLeaf {
             path,
             location,
             information,
@@ -108,7 +108,7 @@ pub fn pretty_tree(t: &Tree, ctx: &Ctx) -> RcDoc<'static, ColorSpec> {
         .append(pretty_doc(&information.doc, ctx))
         .append(pretty_doc(&information.splain, ctx)),
 
-        Tree::Leaf(Leaf::Virtual(VirtualLeaf { path, information })) => RcDoc::text(format!(
+        Node::Leaf(Leaf::Virtual(VirtualLeaf { path, information })) => RcDoc::text(format!(
             "{}{}({}){}",
             style::Bold,
             style::Faint,

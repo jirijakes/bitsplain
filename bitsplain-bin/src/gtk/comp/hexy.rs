@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use bitsplain::tree::Annotations;
+use bitsplain::tree::Tree;
 use gtk::prelude::*;
 use relm4::*;
 
@@ -9,7 +9,7 @@ use crate::hexy::HexyLook;
 pub enum HexyModel {
     Empty,
     Full {
-        annotations: Rc<Annotations>,
+        annotations: Rc<Tree>,
         bytes: Rc<Vec<u8>>,
         selection: Option<(u32, u32)>,
     },
@@ -18,7 +18,7 @@ pub enum HexyModel {
 #[derive(Debug)]
 pub enum HexyMsg {
     Open {
-        annotations: Rc<Annotations>,
+        annotations: Rc<Tree>,
         bytes: Rc<Vec<u8>>,
     },
     Select(u32, u32),

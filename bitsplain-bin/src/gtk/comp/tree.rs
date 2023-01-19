@@ -23,7 +23,7 @@ struct Row {
 pub enum TreeModel {
     Empty,
     Full {
-        annotations: Rc<Annotations>,
+        annotations: Rc<Tree>,
         store: gtk::TreeListModel,
     },
 }
@@ -52,7 +52,7 @@ lazy_static! {
 
 #[derive(Debug)]
 pub enum TreeMsg {
-    Open { annotations: Rc<Annotations> },
+    Open { annotations: Rc<Tree> },
     Select(Option<Vec<String>>),
 }
 
@@ -164,9 +164,9 @@ fn get_children(obj: &gtk::glib::Object) -> Option<gtk::gio::ListModel> {
     }
 }
 
-fn tree_to_row(tree: &Tree) -> Row {
+fn tree_to_row(tree: &Node) -> Row {
     match tree {
-        Tree::Group {
+        Node::Group {
             path,
             location: GroupLocation {
                 byte_from, byte_to, ..
@@ -196,7 +196,7 @@ fn tree_to_row(tree: &Tree) -> Row {
                 children: children.iter().map(tree_to_row).collect(),
             }
         }
-        Tree::Leaf(Leaf::Real(RealLeaf {
+        Node::Leaf(Leaf::Real(RealLeaf {
             location: LeafLocation { from, to, index },
             information:
                 Information {
@@ -229,7 +229,7 @@ fn tree_to_row(tree: &Tree) -> Row {
                 children: vec![],
             }
         }
-        Tree::Leaf(Leaf::Virtual(VirtualLeaf {
+        Node::Leaf(Leaf::Virtual(VirtualLeaf {
             information:
                 Information {
                     label: annotation,
@@ -251,7 +251,7 @@ fn tree_to_row(tree: &Tree) -> Row {
     }
 }
 
-fn tree_to_model(items: &[Tree]) -> gtk::gio::ListModel {
+fn tree_to_model(items: &[Node]) -> gtk::gio::ListModel {
     let store = gtk::gio::ListStore::new(gtk::glib::BoxedAnyObject::static_type());
 
     items.iter().for_each(|t| {

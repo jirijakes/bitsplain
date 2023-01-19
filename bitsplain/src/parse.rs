@@ -67,7 +67,7 @@ pub struct Annotated<Fragment> {
     /// Fragment (raw data) to be parsed next.
     next_fragment: Fragment,
     /// Tree of annotations.
-    tree: Vec<Tree>,
+    tree: Vec<Node>,
     /// Most recently inserted range. None if no range inserted yet.
     last_range: Option<(usize, usize)>,
     /// Additional data that parsers can provide.
@@ -147,29 +147,29 @@ impl<Fragment> Annotated<Fragment> {
     }
 
     /// Place appendices to the proper place inside tree. Returns a copy of the original tree.
-    fn inject_appendices(tree: Vec<Tree>, app: &[Appendix]) -> Vec<Tree> {
+    fn inject_appendices(tree: Vec<Node>, app: &[Appendix]) -> Vec<Node> {
         let mut new_tree = vec![];
 
         tree.into_iter().for_each(|t| match t {
-            Tree::Group {
+            Node::Group {
                 path,
                 location,
                 information,
                 children,
-            } => new_tree.push(Tree::Group {
+            } => new_tree.push(Node::Group {
                 path,
                 location,
                 information,
                 children: Self::inject_appendices(children, app),
             }),
-            Tree::Leaf(Leaf::Real(r)) => {
+            Node::Leaf(Leaf::Real(r)) => {
                 let from = r.location.from;
                 let to = r.location.to;
-                new_tree.push(Tree::Leaf(Leaf::Real(r)));
+                new_tree.push(Node::Leaf(Leaf::Real(r)));
                 app.iter()
                     .filter(|app| app.place == Place::After && app.from == from && app.to == to)
                     .for_each(|app| {
-                        new_tree.push(Tree::Leaf(Leaf::Virtual(VirtualLeaf {
+                        new_tree.push(Node::Leaf(Leaf::Virtual(VirtualLeaf {
                             information: app.information.clone(),
                             path: vec![],
                         })))
@@ -182,17 +182,17 @@ impl<Fragment> Annotated<Fragment> {
     }
 
     /// Traverse the tree and set path of each node.
-    fn inject_paths(tree: &mut [Tree], prefix: Vec<String>) {
+    fn inject_paths(tree: &mut [Node], prefix: Vec<String>) {
         tree.iter_mut().enumerate().for_each(|(i, t)| match t {
-            Tree::Leaf(Leaf::Real(RealLeaf { path, .. })) => {
+            Node::Leaf(Leaf::Real(RealLeaf { path, .. })) => {
                 path.append(&mut prefix.clone());
                 path.push(i.to_string());
             }
-            Tree::Leaf(Leaf::Virtual(VirtualLeaf { path, .. })) => {
+            Node::Leaf(Leaf::Virtual(VirtualLeaf { path, .. })) => {
                 path.append(&mut prefix.clone());
                 path.push(i.to_string());
             }
-            Tree::Group { path, children, .. } => {
+            Node::Group { path, children, .. } => {
                 path.append(&mut prefix.clone());
                 path.push(i.to_string());
                 Self::inject_paths(children, path.clone())
@@ -202,19 +202,19 @@ impl<Fragment> Annotated<Fragment> {
 
     /// Replace annotations by data field 'annotation', if it exsts, and bake
     /// enumerations. This allows the specify annotation ex post.
-    fn bake_annotations(tree: &mut Tree, enumeration: usize) {
+    fn bake_annotations(tree: &mut Node, enumeration: usize) {
         match tree {
-            Tree::Leaf(Leaf::Real(RealLeaf { information, .. })) => {
+            Node::Leaf(Leaf::Real(RealLeaf { information, .. })) => {
                 if let Some(x) = information.data.remove("annotation") {
                     information.label = x;
                 };
             }
-            Tree::Leaf(Leaf::Virtual(VirtualLeaf { information, .. })) => {
+            Node::Leaf(Leaf::Virtual(VirtualLeaf { information, .. })) => {
                 if let Some(x) = information.data.remove("annotation") {
                     information.label = x;
                 };
             }
-            Tree::Group {
+            Node::Group {
                 information,
                 children,
                 ..
@@ -233,11 +233,11 @@ impl<Fragment> Annotated<Fragment> {
     }
 
     /// Render annotations.
-    pub fn annotations(self) -> Annotations {
+    pub fn annotations(self) -> Tree {
         let mut tree = Self::inject_appendices(self.tree, &self.appendices.as_ref().borrow());
         Self::inject_paths(&mut tree, vec![]);
         tree.iter_mut().for_each(|t| Self::bake_annotations(t, 0));
-        Annotations::from_trees(tree)
+        Tree::from_nodes(tree)
     }
 
     pub fn new(fragment: Fragment) -> Annotated<Fragment> {
@@ -413,7 +413,7 @@ where
         // If the tree returned by parser does not have any new items,
         // we are in the leaf situation (parser did not produce any new branches).
         let node = if span.tree.is_empty() {
-            Tree::Leaf(Leaf::Real(RealLeaf {
+            Node::Leaf(Leaf::Real(RealLeaf {
                 path: vec![],
                 location: LeafLocation { from, to, index },
                 information: Information {
@@ -426,7 +426,7 @@ where
                 },
             }))
         } else {
-            Tree::Group {
+            Node::Group {
                 path: vec![],
                 location: GroupLocation {
                     byte_from: from,
@@ -448,7 +448,7 @@ where
 
         // Only leaves advance index, groups are only logical collections of
         // leaves, they do not represent anything in the raw data.
-        let next_index = if matches!(node, Tree::Leaf(_)) {
+        let next_index = if matches!(node, Node::Leaf(_)) {
             span.next_index + 1
         } else {
             span.next_index

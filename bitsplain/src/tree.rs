@@ -8,7 +8,7 @@ use crate::value::Value;
 
 /// Tree of [`Values`](crate::value).
 #[derive(Debug, Clone)]
-pub enum Tree {
+pub enum Node {
     Group {
         /// Path to this group.
         path: Vec<String>,
@@ -17,32 +17,32 @@ pub enum Tree {
         /// Group's information.
         information: Information,
         /// Children.
-        children: Vec<Tree>,
+        children: Vec<Node>,
     },
     Leaf(Leaf),
 }
 
-impl Tree {
+impl Node {
     pub fn index_range(&self) -> (usize, usize) {
         match self {
             // Tree::Virtual { .. } => todo!(), //(500, 500),
-            Tree::Group { children, .. } => children
+            Node::Group { children, .. } => children
                 .iter()
                 // .filter(|t| !matches!(t, Tree::Virtual { .. }))
                 .fold((usize::MAX, usize::MIN), |(min_from, max_to), ch| {
                     let (from, to) = ch.index_range();
                     (min_from.min(from), max_to.max(to))
                 }),
-            Tree::Leaf(Leaf::Real(RealLeaf { location, .. })) => (location.index, location.index),
+            Node::Leaf(Leaf::Real(RealLeaf { location, .. })) => (location.index, location.index),
             _ => (usize::MAX, usize::MIN),
         }
     }
 
     pub fn information(&self) -> &Information {
         match self {
-            Tree::Group { information, .. } => information,
-            Tree::Leaf(Leaf::Real(l)) => &l.information,
-            Tree::Leaf(Leaf::Virtual(l)) => &l.information,
+            Node::Group { information, .. } => information,
+            Node::Leaf(Leaf::Real(l)) => &l.information,
+            Node::Leaf(Leaf::Virtual(l)) => &l.information,
         }
     }
 }
@@ -158,34 +158,34 @@ pub enum Leaf {
 }
 
 #[derive(Debug)]
-pub struct Annotations(Vec<Tree>);
+pub struct Tree(Vec<Node>);
 
-impl Annotations {
+impl Tree {
     #[inline]
-    pub fn from_trees(trees: Vec<Tree>) -> Annotations {
-        Annotations(trees)
+    pub fn from_nodes(trees: Vec<Node>) -> Tree {
+        Tree(trees)
     }
 
     pub fn leaves(&self) -> Vec<&RealLeaf> {
         Self::tree_leaves(&self.0)
     }
 
-    fn tree_leaves(trees: &[Tree]) -> Vec<&RealLeaf> {
+    fn tree_leaves(trees: &[Node]) -> Vec<&RealLeaf> {
         trees
             .iter()
             .flat_map(|tree| match tree {
-                Tree::Group { children, .. } => Self::tree_leaves(children),
-                Tree::Leaf(Leaf::Real(leaf)) => vec![leaf],
+                Node::Group { children, .. } => Self::tree_leaves(children),
+                Node::Leaf(Leaf::Real(leaf)) => vec![leaf],
                 _ => vec![], // Tree::Virtual { .. } => vec![],
             })
             .collect()
     }
 
-    pub fn select<'a>(&'a self, path: &'a [String]) -> Option<&'a Tree> {
+    pub fn select<'a>(&'a self, path: &'a [String]) -> Option<&'a Node> {
         Self::select_path(&self.0, path)
     }
 
-    fn select_path<'a>(tree: &'a [Tree], path: &'a [String]) -> Option<&'a Tree> {
+    fn select_path<'a>(tree: &'a [Node], path: &'a [String]) -> Option<&'a Node> {
         let (head, tail) = path.split_first()?;
         let i = head.parse::<usize>().ok()?;
         // TODO: Find more efficient solution
@@ -198,7 +198,7 @@ impl Annotations {
             Some(subtree)
         } else {
             match subtree {
-                Tree::Group { children, .. } => Self::select_path(children, tail),
+                Node::Group { children, .. } => Self::select_path(children, tail),
                 _ => None,
                 // Tree::Virtual { .. } => None,
             }
@@ -206,8 +206,8 @@ impl Annotations {
     }
 }
 
-impl Deref for Annotations {
-    type Target = [Tree];
+impl Deref for Tree {
+    type Target = [Node];
 
     fn deref(&self) -> &Self::Target {
         &self.0

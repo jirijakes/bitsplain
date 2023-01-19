@@ -3,7 +3,7 @@
 use bytes::Bytes;
 
 use crate::binary::*;
-use crate::tree::Annotations;
+use crate::tree::Tree;
 
 /// Description of a function that can decode data.
 ///
@@ -23,7 +23,7 @@ pub struct Decoder {
     pub symbol: &'static str,
 
     /// Decoding function.
-    pub decode: fn(&Binary) -> Option<Annotations>,
+    pub decode: fn(&Binary) -> Option<Tree>,
 }
 
 impl std::fmt::Debug for Decoder {
@@ -64,7 +64,7 @@ pub struct Candidate {
     pub decoder: &'static Decoder,
 
     /// Annotations of the parsed data.
-    pub annotations: Annotations,
+    pub annotations: Tree,
 
     /// Original binary input.
     pub data: Binary,
