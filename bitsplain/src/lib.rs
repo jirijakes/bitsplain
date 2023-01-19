@@ -1,16 +1,32 @@
-use binary::Binary;
-use bytes::Bytes;
-use decode::Decoder;
-pub use nom::IResult;
-use parse::Annotated;
-use time::OffsetDateTime;
-use tree::Annotations;
+//! Bitsplain is a library that helps people understand Bitcoin-related
+//! binary data. When provided with some data — be it a binary file, hex-encoded
+//! string or any other commonly used encoding scheme — Bitsplain first tries to
+//! identify what the data represent and if it succeeds it offers an explanation
+//! of the data through “annotations”. These annotations consist of description, data type,
+//! rendered value, position in the binary input etc.
+//!
+//! The library does not interpret the annotations, however crate `bitsplain-bin`
+//! offers two user interfaces, a CLI and GTK.
+//!
+//! ## Use it
+//!
+//! Calling `bitsplain::decode::decode_input(input)` will return a vector of [`candidates`](crate::decode::Candidate).
+//! Each of the candidates contains reference to [`decoder`](crate::decode::Decoder) which successfully
+//! parsed the data, the [`annotations`](crate::tree::Annotations) and view over original binary data.
+//!
+//! ## How it works?
+//!
+//! Bitsplain uses [`nom`] to implement parsers of all the supported data formats.
+//! Using custom parser implementation it can track every value that the parser
+//! returns and its position within the data. All this information is assembled
+//! in a tree of [`Values`](crate::value), which is then returned for interpretation. Writers of data parsers
+//! can use a convenient [`DSL`](dsl).
+//!
 pub use {bitcoin, hex, nom};
 
 pub mod binary;
 pub mod decode;
 pub mod dsl;
-pub mod lines;
 pub mod parse;
 pub mod tree;
 pub mod types;
@@ -19,38 +35,10 @@ pub mod value;
 mod btc;
 mod ln;
 
-pub type Span<'a> = Annotated<&'a [u8]>;
-
-/// Input from user.
-#[derive(Clone, Debug)]
-pub enum Input {
-    /// User provided directly string (via argument).
-    String(String),
-
-    /// User provided some binary data (via stdin or file).
-    /// The data could be interpreted either as raw or as string.
-    Binary(Bytes),
-}
-
-#[derive(Debug)]
-pub struct Candidate {
-    pub decoder: &'static Decoder,
-    pub annotations: Annotations,
-    pub data: Binary,
-}
-
-pub fn format_time(time: &OffsetDateTime) -> String {
-    time.format(
-        &time::format_description::parse("[year]-[month]-[day] [hour]:[minute]:[second]").unwrap(),
-    )
-    .unwrap()
-}
-
-pub enum Void {}
-
 /// Registers new decoder, defined by parser function, under a specified name.
 /// Optionally a condidition, in form of a pattern match, can be added.
 #[rustfmt::skip]
+#[macro_export]
 macro_rules! decoder {
     (
         title = $title: literal,
@@ -66,14 +54,14 @@ macro_rules! decoder {
         $func: path,
         $(|)? $( $pattern:pat_param )|+ $( if $guard: expr )? $(,)?) => {
         inventory::submit! {
-            crate::decode::Decoder {
+            $crate::decode::Decoder {
                 title: $title,
                 group: $group,
                 symbol: $symbol,
                 decode: |b| {
                     if matches!(b, $( $pattern )|+ $( if $guard )?) {
-                        $func(crate::parse::Annotated::new(&b)).ok().and_then(|(x, _)| {
-                            use crate::nom::InputLength;
+                        $func($crate::parse::Annotated::new(&b)).ok().and_then(|(x, _)| {
+                            use $crate::nom::InputLength;
                             if x.input_len() > 0 {
                                 None
                             } else {
@@ -93,7 +81,8 @@ decoder!(
     title = "Bitcoin block header",
     group = "btc",
     symbol = "header",
-    crate::btc::block::block_header
+    crate::btc::block::block_header,
+    b if b.len() == 80
 );
 
 decoder!(
@@ -143,7 +132,7 @@ decoder!(
     group = "ln",
     symbol = "bolt12o",
     crate::ln::bolt12::bolt12,
-    Binary::Bech32(hrp, _ ) if hrp == "lno",
+    crate::binary::Binary::Bech32(hrp, _ ) if hrp == "lno",
 );
 
 decoder!(
@@ -151,7 +140,7 @@ decoder!(
     group = "ln",
     symbol = "bolt12r",
     crate::ln::bolt12::bolt12,
-    Binary::Bech32(hrp, _ ) if hrp == "lnr",
+    crate::binary::Binary::Bech32(hrp, _ ) if hrp == "lnr",
 );
 
 decoder!(
@@ -159,7 +148,7 @@ decoder!(
     group = "ln",
     symbol = "bolt12i",
     crate::ln::bolt12::bolt12,
-    Binary::Bech32(hrp, _ ) if hrp == "lni",
+    crate::binary::Binary::Bech32(hrp, _ ) if hrp == "lni",
 );
 
 decoder!(
@@ -167,7 +156,7 @@ decoder!(
     group = "btc",
     symbol = "bip47",
     crate::btc::bip47::payment_code,
-    Binary::Base58Check(b) if b.first() == Some(&0x47)
+    crate::binary::Binary::Base58Check(b) if b.first() == Some(&0x47)
 );
 
 decoder!(

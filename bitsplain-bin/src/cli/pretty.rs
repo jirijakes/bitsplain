@@ -8,6 +8,7 @@ use human_size::{Byte, SpecificSize};
 use pretty::termcolor::*;
 use pretty::RcDoc;
 use termion::{color, style};
+use time::OffsetDateTime;
 
 use crate::ctx::*;
 
@@ -22,7 +23,7 @@ pub fn pretty_tree(t: &Tree, ctx: &Ctx) -> RcDoc<'static, ColorSpec> {
             "{}{}{}{}:",
             style::Bold,
             style::Faint,
-            information.annotation,
+            information.label,
             style::Reset
         ))
         .append(if let Some(tag) = information.tags.first() {
@@ -73,7 +74,7 @@ pub fn pretty_tree(t: &Tree, ctx: &Ctx) -> RcDoc<'static, ColorSpec> {
             "{}{}{}{}",
             style::Bold,
             style::Faint,
-            information.annotation,
+            information.label,
             style::Reset
         ))
         .append(RcDoc::as_string(":"))
@@ -111,7 +112,7 @@ pub fn pretty_tree(t: &Tree, ctx: &Ctx) -> RcDoc<'static, ColorSpec> {
             "{}{}({}){}",
             style::Bold,
             style::Faint,
-            information.annotation,
+            information.label,
             style::Reset
         ))
         .append(RcDoc::as_string(":"))
@@ -281,4 +282,11 @@ fn pretty_utf8(bs: &[u8]) -> RcDoc<'static, ColorSpec> {
             })
             .collect::<String>(),
     )
+}
+
+fn format_time(time: &OffsetDateTime) -> String {
+    time.format(
+        &time::format_description::parse("[year]-[month]-[day] [hour]:[minute]:[second]").unwrap(),
+    )
+    .unwrap()
 }

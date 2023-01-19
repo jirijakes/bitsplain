@@ -49,7 +49,7 @@ impl SimpleComponent for DocModel {
     fn update(&mut self, msg: Self::Input, _sender: ComponentSender<Self>) {
         match msg {
             DocMsg::T(range, s) => {
-                self.subtitle = Some(s.annotation.to_string());
+                self.subtitle = Some(s.label.to_string());
                 self.data_type = s.data.get("datatype").cloned();
                 self.doc = s.doc;
                 self.value = Some(s.value);

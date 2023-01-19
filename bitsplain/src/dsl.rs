@@ -154,7 +154,7 @@ impl<T> Ann<T> {
     }
 }
 
-/// Marker for [`MakeValue`] that creates value out of [`ToValue`].
+/// Marker for [`Make`] that creates value out of [`ToValue`].
 pub struct Auto<T: ToValue>(PhantomData<T>);
 
 /// Automatically derives [`Value`] from [`ToValue`] instance.

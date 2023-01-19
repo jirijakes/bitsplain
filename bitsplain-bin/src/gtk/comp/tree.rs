@@ -173,7 +173,7 @@ fn tree_to_row(tree: &Tree) -> Row {
             },
             information:
                 Information {
-                    annotation,
+                    label: annotation,
                     value,
                     data,
                     tags,
@@ -200,7 +200,7 @@ fn tree_to_row(tree: &Tree) -> Row {
             location: LeafLocation { from, to, index },
             information:
                 Information {
-                    annotation,
+                    label: annotation,
                     value,
                     data,
                     tags,
@@ -230,9 +230,12 @@ fn tree_to_row(tree: &Tree) -> Row {
             }
         }
         Tree::Leaf(Leaf::Virtual(VirtualLeaf {
-            information: Information {
-                annotation, value, ..
-            },
+            information:
+                Information {
+                    label: annotation,
+                    value,
+                    ..
+                },
             path,
             ..
         })) => Row {

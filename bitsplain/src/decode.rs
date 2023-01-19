@@ -1,12 +1,17 @@
 //! Core types and functions related to decoding of binary data.
 
+use bytes::Bytes;
+
 use crate::binary::*;
 use crate::tree::Annotations;
-use crate::{Candidate, Input};
 
-/// Description of a function that can decode data. During program's
-/// execution, decoders are tried one by one and those that return a result
-/// are collected.
+/// Description of a function that can decode data.
+///
+/// During program's execution, decoders are tried one by one
+/// and those that return a result are collected.
+///
+/// The fields `group` and `symbol` are user-facing, they allow users
+/// filter decoders to be used.
 pub struct Decoder {
     /// Name of data returned by this decoder.
     pub title: &'static str,
@@ -35,6 +40,34 @@ inventory::collect!(Decoder);
 /// List of all known decoders.
 pub fn all_decoders() -> Vec<&'static Decoder> {
     inventory::iter::<Decoder>().collect()
+}
+
+/// Input from user.
+#[derive(Clone, Debug)]
+pub enum Input {
+    /// User provided directly string (via argument).
+    String(String),
+
+    /// User provided some binary data (via stdin or file).
+    /// The data could be interpreted either as raw or as string.
+    Binary(Bytes),
+}
+
+/// One of successful results of decoding binary input.
+///
+/// Having a candidate does not necessarily mean that we know the
+/// exact meaning of the input, only that it could be successfully
+/// parsed using the given decoder.
+#[derive(Debug)]
+pub struct Candidate {
+    /// Decoder that successully parsed the data.
+    pub decoder: &'static Decoder,
+
+    /// Annotations of the parsed data.
+    pub annotations: Annotations,
+
+    /// Original binary input.
+    pub data: Binary,
 }
 
 /// Attempt to decode input with the best effort.

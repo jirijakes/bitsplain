@@ -6,15 +6,13 @@ use crate::ln::{rgb_color, short_channel_id};
 use crate::nom::combinator::{success, value};
 use crate::nom::multi::length_count;
 use crate::nom::number::complete::*;
-use crate::nom::IResult;
 use crate::parse::*;
 use crate::types::*;
 use crate::value::Value;
-use crate::Span;
 
-pub fn gossip_timestamp_filter(s: Span) -> IResult<Span, GossipTimestampFilter> {
+pub fn gossip_timestamp_filter(s: Span) -> Parsed<GossipTimestampFilter> {
     let (s, _) = value(265, be_u16)(s)?;
-    let (s, chain_hash) = parse(chain_hash, ann("Chain hash", auto()))(s)?;
+    let (s, chain_hash) = parse(chain_hash_be, ann("Chain hash", auto()))(s)?;
     let (s, first_timestamp) = parse(timestamp(be_u32), ann("First timestamp", auto()))(s)?;
     let (s, timestamp_range) = parse(be_u32, ann("Timestamp range", auto()))(s)?;
 
@@ -28,7 +26,7 @@ pub fn gossip_timestamp_filter(s: Span) -> IResult<Span, GossipTimestampFilter> 
     ))
 }
 
-pub fn node_announcement(s: Span) -> IResult<Span, ()> {
+pub fn node_announcement(s: Span) -> Parsed<()> {
     let (s, _) = value(257, be_u16)(s)?;
     let (s, _signature) = parse(signature, ann("Signature", auto()))(s)?;
     let (s, len) = parse(be_u16, ann("Features length", auto()))(s)?;
@@ -62,10 +60,10 @@ pub fn node_announcement(s: Span) -> IResult<Span, ()> {
     Ok((s, ()))
 }
 
-pub fn channel_update(s: Span) -> IResult<Span, ()> {
+pub fn channel_update(s: Span) -> Parsed<()> {
     let (s, _) = value(258, be_u16)(s)?;
     let (s, _signature) = parse(signature, ann("Signature", auto()))(s)?;
-    let (s, _chain_hash) = parse(chain_hash, ann("Chain hash", auto()))(s)?;
+    let (s, _chain_hash) = parse(chain_hash_be, ann("Chain hash", auto()))(s)?;
     let (s, _scid) = parse(short_channel_id, ann("Short channel ID", auto()))(s)?;
     let (s, _timestamp) = parse(timestamp(be_u32), ann("Timestamp", auto()))(s)?;
     let (s, _) = parse(u8, ann("Message flags", auto()))(s)?;
@@ -80,7 +78,7 @@ pub fn channel_update(s: Span) -> IResult<Span, ()> {
     Ok((s, ()))
 }
 
-pub fn channel_announcement(s: Span) -> IResult<Span, ()> {
+pub fn channel_announcement(s: Span) -> Parsed<()> {
     let (s, _) = value(256, be_u16)(s)?;
     let (s, _node_signature_1) = parse(signature, ann("Node signature 1", auto()))(s)?;
     let (s, _node_signature_2) = parse(signature, ann("Node signature 2", auto()))(s)?;
@@ -101,7 +99,7 @@ pub fn channel_announcement(s: Span) -> IResult<Span, ()> {
 
     // TODO: print interpeted features
 
-    let (s, _chain_hash) = parse(chain_hash, ann("Chain hash", auto()))(s)?;
+    let (s, _chain_hash) = parse(chain_hash_be, ann("Chain hash", auto()))(s)?;
     let (s, _scid) = parse(short_channel_id, ann("Short channel ID", auto()))(s)?;
     let (s, _node_id_1) = parse(public_key, ann("Node 1 ID", auto()))(s)?;
     let (s, _node_id_2) = parse(public_key, ann("Node 2 ID", auto()))(s)?;

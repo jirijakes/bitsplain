@@ -1,75 +1,22 @@
+//! Hierarchical structure of [`Values`](crate::value) that is built
+//! during parsing of the binary input.
+
 use std::collections::HashMap;
 use std::ops::Deref;
 
-use crate::lines::Lines;
 use crate::value::Value;
 
-#[derive(Debug, Clone)]
-pub struct LeafLocation {
-    pub from: usize,
-    pub to: usize,
-    pub index: usize,
-}
-
-#[derive(Debug, Clone)]
-pub struct GroupLocation {
-    pub byte_from: usize,
-    pub byte_to: usize,
-    pub index_from: usize,
-    pub index_to: usize,
-}
-
-#[derive(Debug, Clone)]
-pub struct Information {
-    pub annotation: String,
-    pub data: HashMap<&'static str, String>,
-    pub tags: Vec<Tag>,
-    pub value: Value,
-    pub doc: Option<String>,
-    pub splain: Option<String>,
-}
-
-impl Information {
-    pub fn has_data(&self, key: &'static str, value: &str) -> bool {
-        match self.data.get(key) {
-            Some(v) => v == value,
-            _ => false,
-        }
-    }
-}
-
-#[derive(Debug, Clone)]
-pub struct Tag {
-    pub label: String,
-    pub color: Option<String>,
-    pub doc: Option<String>,
-}
-
-#[derive(Debug, Clone)]
-pub struct VirtualLeaf {
-    pub path: Vec<String>,
-    pub information: Information,
-}
-
-#[derive(Debug, Clone)]
-pub struct RealLeaf {
-    pub path: Vec<String>,
-    pub location: LeafLocation,
-    pub information: Information,
-}
-
-#[derive(Debug, Clone)]
-pub enum Leaf {
-    Real(RealLeaf),
-    Virtual(VirtualLeaf),
-}
-
+/// Tree of [`Values`](crate::value).
 #[derive(Debug, Clone)]
 pub enum Tree {
     Group {
+        /// Path to this group.
         path: Vec<String>,
+        /// Location of the group.
         location: GroupLocation,
+        /// Group's information.
         information: Information,
+        /// Children.
         children: Vec<Tree>,
     },
     Leaf(Leaf),
@@ -100,6 +47,116 @@ impl Tree {
     }
 }
 
+/// Range of bytes in the binary input that is further
+/// indivisible (i. e. leaf of tree).
+///
+/// The location is exclusive in the upper bound (`to`), i. e.
+/// the number of bytes in the range is `from - to`.
+#[derive(Debug, Clone)]
+pub struct LeafLocation {
+    /// Offset of the first byte of the leaf.
+    pub from: usize,
+
+    /// Exclusive offset of the last byte of the leaf.
+    pub to: usize,
+
+    /// Ordinal index of this leaf.
+    pub index: usize,
+}
+
+/// Range of bytes in the binary input that is further divided,
+/// i. e. may contains leaves or other groups.
+///
+/// The upper bounds are exclusive.
+#[derive(Debug, Clone)]
+pub struct GroupLocation {
+    /// Offset of the first byte of the group.
+    pub byte_from: usize,
+
+    /// Exclusive offset of the last byte of the group.
+    pub byte_to: usize,
+
+    /// Ordinal index of the first byte of the group.
+    pub index_from: usize,
+
+    /// Ordinal index of the last byte of the group.
+    pub index_to: usize,
+}
+
+/// Details about leaf or group.
+#[derive(Debug, Clone)]
+pub struct Information {
+    /// Label of the leaf or group.
+    pub label: String,
+
+    /// Auxiliary data attached to the leaf or group.
+    pub data: HashMap<&'static str, String>,
+
+    /// Tags attached to the leaf or group.
+    pub tags: Vec<Tag>,
+
+    /// Value of the leaf or group.
+    pub value: Value,
+
+    /// Documentation string.
+    pub doc: Option<String>,
+
+    /// Splain string.
+    pub splain: Option<String>,
+}
+
+impl Information {
+    pub fn has_data(&self, key: &'static str, value: &str) -> bool {
+        match self.data.get(key) {
+            Some(v) => v == value,
+            _ => false,
+        }
+    }
+}
+
+/// Tag attached to leaf or group.
+#[derive(Debug, Clone)]
+pub struct Tag {
+    pub label: String,
+    pub color: Option<String>,
+    pub doc: Option<String>,
+}
+
+/// Leaf that is not directly represented in binary input. Its value is
+/// calculated from other available data.
+#[derive(Debug, Clone)]
+pub struct VirtualLeaf {
+    /// Path to this leaf.
+    pub path: Vec<String>,
+
+    /// The leaf's information.
+    pub information: Information,
+}
+
+/// Leaf that is represented in binary input. Its value is interpretation
+/// of the input.
+#[derive(Debug, Clone)]
+pub struct RealLeaf {
+    /// Path to this leaf.
+    pub path: Vec<String>,
+
+    /// Location of this leaf.
+    pub location: LeafLocation,
+
+    /// The leaf's information.
+    pub information: Information,
+}
+
+/// A leaf in the tree.
+#[derive(Debug, Clone)]
+pub enum Leaf {
+    /// Real leaf, represented in binary input.
+    Real(RealLeaf),
+
+    /// Virtual leaf, not represented in binary input.
+    Virtual(VirtualLeaf),
+}
+
 #[derive(Debug)]
 pub struct Annotations(Vec<Tree>);
 
@@ -111,10 +168,6 @@ impl Annotations {
 
     pub fn leaves(&self) -> Vec<&RealLeaf> {
         Self::tree_leaves(&self.0)
-    }
-
-    pub fn lines<'a>(&'a self, bytes: &'a [u8]) -> Lines<'a> {
-        Lines::new(self.leaves(), bytes)
     }
 
     fn tree_leaves(trees: &[Tree]) -> Vec<&RealLeaf> {

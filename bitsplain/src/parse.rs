@@ -1,3 +1,5 @@
+//! Customization of [`nom`] parser and all related functions and types.
+
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::ops::{Deref, RangeFrom, RangeTo};
@@ -9,14 +11,21 @@ use nom::{AsBytes, IResult, InputIter, InputLength, InputTake, Needed, Offset, P
 use crate::dsl::Ann;
 use crate::tree::*;
 use crate::value::*;
-use crate::Void;
 
-/// Pointer to a location in parsed data.
+/// Annotating `nom` parser for binary data.
+pub type Span<'a> = Annotated<&'a [u8]>;
+
+/// Result of parsing using [`Span`].
+pub type Parsed<'a, O> = IResult<Span<'a>, O>;
+
+/// Uninhabited type used with [`Ann`] marking that no input value exists.
+pub enum NoValue {}
+
+/// Pointer to a location in currently parsed data.
 ///
-/// A bookmark can be crated from annotated span by calling [`bookmark`](Annotated::bookmar).
-/// One wants to use bookmark when inserting annotation to a previous location but later
-/// in the parsing. For example, when some data become available later than their annotation
-/// should appear.
+/// A bookmark can be crated from annotated span by calling [`bookmark`](Annotated::bookmark).
+/// One wants to use bookmark when retrospectively inserting annotation to a previous location.
+/// For example, when some data become available later than their annotation should appear.
 ///
 /// When having a bookmark, new annotation can be inserted at its location by calling
 /// [`insert_at`](Annotated<Fragment>).
@@ -76,14 +85,14 @@ impl<Fragment> Annotated<Fragment> {
     }
 
     /// Insert an annotation at the bookmark's position.
-    pub fn insert_at(&self, bookmark: &Bookmark, ann: Ann<Void>) {
+    pub fn insert_at(&self, bookmark: &Bookmark, ann: Ann<NoValue>) {
         if let Some((from, to)) = bookmark.0 {
             self.appendices.borrow_mut().push(Appendix {
                 from,
                 to,
                 place: Place::After,
                 information: Information {
-                    annotation: ann.label,
+                    label: ann.label,
                     value: ann.value.resolve_static().unwrap_or(Value::Nil),
                     doc: ann.doc.clone(),
                     splain: ann.splain.resolve_static(),
@@ -118,15 +127,15 @@ impl<Fragment> Annotated<Fragment> {
 
     /// Insert an annotation to current position.
     ///
-    /// To insert annotations to a previous position, see [`insert_at`].
-    pub fn insert(&self, ann: Ann<Void>) {
+    /// To insert annotations to a previous position, see [`Self::insert_at`].
+    pub fn insert(&self, ann: Ann<NoValue>) {
         if let Some((from, to)) = self.last_range {
             self.appendices.borrow_mut().push(Appendix {
                 from,
                 to,
                 place: Place::After,
                 information: Information {
-                    annotation: ann.label,
+                    label: ann.label,
                     value: ann.value.resolve_static().unwrap_or(Value::Nil),
                     doc: ann.doc.clone(),
                     splain: ann.splain.resolve_static(),
@@ -197,12 +206,12 @@ impl<Fragment> Annotated<Fragment> {
         match tree {
             Tree::Leaf(Leaf::Real(RealLeaf { information, .. })) => {
                 if let Some(x) = information.data.remove("annotation") {
-                    information.annotation = x;
+                    information.label = x;
                 };
             }
             Tree::Leaf(Leaf::Virtual(VirtualLeaf { information, .. })) => {
                 if let Some(x) = information.data.remove("annotation") {
-                    information.annotation = x;
+                    information.label = x;
                 };
             }
             Tree::Group {
@@ -211,9 +220,9 @@ impl<Fragment> Annotated<Fragment> {
                 ..
             } => {
                 if let Some(x) = information.data.remove("annotation") {
-                    information.annotation = x;
+                    information.label = x;
                 } else if information.has_data("list", "enumerate") {
-                    information.annotation = (enumeration - 1).to_string();
+                    information.label = (enumeration - 1).to_string();
                 };
                 children
                     .iter_mut()
@@ -230,9 +239,7 @@ impl<Fragment> Annotated<Fragment> {
         tree.iter_mut().for_each(|t| Self::bake_annotations(t, 0));
         Annotations::from_trees(tree)
     }
-}
 
-impl<Fragment> Annotated<Fragment> {
     pub fn new(fragment: Fragment) -> Annotated<Fragment> {
         Annotated {
             next_index: 0,
@@ -410,7 +417,7 @@ where
                 path: vec![],
                 location: LeafLocation { from, to, index },
                 information: Information {
-                    annotation: ann.label.clone(),
+                    label: ann.label.clone(),
                     data: span.data,
                     tags: ann.tags.iter().filter_map(|t| t.resolve(&out)).collect(),
                     value: ann.value.resolve(&out),
@@ -428,7 +435,7 @@ where
                     index_to: span.next_index - 1, // inclusive
                 },
                 information: Information {
-                    annotation: ann.label.clone(),
+                    label: ann.label.clone(),
                     data: span.data,
                     tags: span.tags,
                     value: ann.value.resolve(&out),

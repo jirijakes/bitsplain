@@ -3,7 +3,7 @@ use std::path::PathBuf;
 
 use ::pretty::termcolor::{ColorChoice, StandardStream};
 use ::pretty::RcDoc;
-use bitsplain::*;
+use bitsplain::decode::{all_decoders, decode_input, Input};
 use clap::Parser;
 
 use crate::ctx::*;
@@ -62,7 +62,7 @@ fn main() {
     let args: Args = Args::parse();
 
     if args.list_decoders {
-        bitsplain::decode::all_decoders()
+        all_decoders()
             .iter()
             .enumerate()
             .for_each(|(i, d)| println!("{:#2}. [{}/{}] {}", i + 1, d.group, d.symbol, d.title));
@@ -115,28 +115,25 @@ fn main() {
         .or_else(|| args.file.map(read_file).map(|b| Input::Binary(b.into())))
         .unwrap_or_else(|| Input::Binary(read_stdin().into()));
 
-    bitsplain::decode::decode_input(input)
-        .into_iter()
-        .take(1)
-        .for_each(|a| {
-            let header = RcDoc::line()
-                .append(RcDoc::text(a.decoder.title))
-                .append(RcDoc::line())
-                .append(RcDoc::text("=".repeat(a.decoder.title.len())))
-                .append(RcDoc::line());
-            let doc = a
-                .annotations
-                .iter()
-                .fold(header, |doc, t| {
-                    doc.append(RcDoc::line())
-                        .append(RcDoc::as_string("- "))
-                        .append(pretty::pretty_tree(t, &ctx))
-                })
-                .nest(4);
+    decode_input(input).into_iter().take(1).for_each(|a| {
+        let header = RcDoc::line()
+            .append(RcDoc::text(a.decoder.title))
+            .append(RcDoc::line())
+            .append(RcDoc::text("=".repeat(a.decoder.title.len())))
+            .append(RcDoc::line());
+        let doc = a
+            .annotations
+            .iter()
+            .fold(header, |doc, t| {
+                doc.append(RcDoc::line())
+                    .append(RcDoc::as_string("- "))
+                    .append(pretty::pretty_tree(t, &ctx))
+            })
+            .nest(4);
 
-            doc.render_colored(100, StandardStream::stdout(ColorChoice::Auto))
-                .unwrap();
-        });
+        doc.render_colored(100, StandardStream::stdout(ColorChoice::Auto))
+            .unwrap();
+    });
 }
 
 //TODO: Error handling

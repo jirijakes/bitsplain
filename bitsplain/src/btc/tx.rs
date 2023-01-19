@@ -4,14 +4,12 @@ use crate::dsl::{ann, auto};
 use crate::nom::combinator::peek;
 use crate::nom::multi::{length_count, many_m_n};
 use crate::nom::number::complete::{be_u16, be_u8};
-use crate::nom::IResult;
 use crate::parse::*;
 use crate::tree::Tag;
 use crate::types::*;
 use crate::value::*;
-use crate::Span;
 
-pub fn out_point(s: Span) -> IResult<Span, OutPoint> {
+pub fn out_point(s: Span) -> Parsed<OutPoint> {
     let (s, txid) = parse(
         txid,
         ann("Previous transaction", auto())
@@ -25,7 +23,7 @@ pub fn out_point(s: Span) -> IResult<Span, OutPoint> {
     Ok((s, OutPoint { txid, vout }))
 }
 
-pub fn tx_out(s: Span) -> IResult<Span, TxOut> {
+pub fn tx_out(s: Span) -> Parsed<TxOut> {
     let (s, value) = parse(
         sat,
         ann("Amount", auto()).doc("Amount of BTC being transfered in this output"),
@@ -74,7 +72,7 @@ pub fn tx_out(s: Span) -> IResult<Span, TxOut> {
     Ok((s, tx_out))
 }
 
-pub fn tx_outs(input: Span) -> IResult<Span, Vec<TxOut>> {
+pub fn tx_outs(input: Span) -> Parsed<Vec<TxOut>> {
     let (s, vout_n) = parse(
         varint,
         ann("Outputs", auto()).doc("Number of outputs of this transaction"),
@@ -86,7 +84,7 @@ pub fn tx_outs(input: Span) -> IResult<Span, Vec<TxOut>> {
     )(s)
 }
 
-pub fn tx_ins(input: Span) -> IResult<Span, Vec<TxIn>> {
+pub fn tx_ins(input: Span) -> Parsed<Vec<TxIn>> {
     let (s, vin_n) = parse(
         varint,
         ann("vin_n", auto()).doc("Number of inputs participating in this transaction"),
@@ -98,7 +96,7 @@ pub fn tx_ins(input: Span) -> IResult<Span, Vec<TxIn>> {
     )(s)
 }
 
-pub fn tx_in(input: Span) -> IResult<Span, TxIn> {
+pub fn tx_in(input: Span) -> Parsed<TxIn> {
     let (s, out) = parse(
         out_point,
         ann("out_point", |o: &OutPoint| {
@@ -124,7 +122,7 @@ pub fn tx_in(input: Span) -> IResult<Span, TxIn> {
 }
 
 /// Parse Bitcoin transaction.
-pub fn tx(s: Span) -> IResult<Span, Transaction> {
+pub fn tx(s: Span) -> Parsed<Transaction> {
     // let bm1 = s.bookmark();
     let (s, version) = parse(
         int32,

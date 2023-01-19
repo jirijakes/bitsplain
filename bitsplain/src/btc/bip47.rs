@@ -4,9 +4,8 @@ use crate::nom::number::complete::*;
 use crate::parse::*;
 use crate::types::*;
 use crate::value::Value;
-use crate::*;
 
-pub fn payment_code(s: Span) -> IResult<Span, ()> {
+pub fn payment_code(s: Span) -> Parsed<()> {
     let (s, _) = parse(
         value(0x47, u8),
         ann(

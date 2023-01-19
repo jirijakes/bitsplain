@@ -6,31 +6,38 @@ use crate::types::*;
 use crate::value::Value;
 use crate::*;
 
-pub fn block_header(s: Span) -> IResult<Span, ()> {
+pub fn block_header(s: Span) -> Parsed<()> {
     let (s, version) = parse(
         int32,
         ann("Version", auto())
             .doc("Number that provides means for the miners to signal readiness for soft forks."),
     )(s)?;
+
+    let bm = s.bookmark();
+
     let (s, prev_blockhash) = parse(
         sha256d,
         ann("Previous block hash", auto()).doc("Hash of the previous block header."),
     )(s)?;
+
     let (s, merkle_root) = parse(
         sha256d,
         ann("Merkle root", auto())
             .doc("Hash of the root of merkle tree of all transactions within this block."),
     )(s)?;
+
     let (s, time) = parse(
         timestamp(uint32),
         ann("Timestamp", auto())
             .www("https://en.bitcoin.it/wiki/Block_timestamp")
             .doc("Time of production of the block. It is not supposed to be accurate, its accuracy is in order of one or two hours. It serves to add variation for the block hash and to contribute to safety of the block chain."),
     )(s)?;
+
     let (s, bits) = parse(
         uint32,
         ann("Bits", auto()).doc("Compact form of current target."),
     )(s)?;
+
     let (s, nonce) = parse(
         uint32,
         ann("Nonce", auto())
@@ -47,6 +54,15 @@ pub fn block_header(s: Span) -> IResult<Span, ()> {
         bits,
         nonce,
     };
+
+    s.insert_at(
+        &bm,
+        ann(
+            "Block hash",
+            Value::Hash(block_header.block_hash().as_hash()),
+        )
+        .doc("Hash of this block."),
+    );
 
     // TODO: The condition is here only to ensure that parsing of non-block header data does not fail.
     // Might be improved by preconditions or other sort of validations.
@@ -70,6 +86,7 @@ pub fn block_header(s: Span) -> IResult<Span, ()> {
                 block_header.block_hash()
             )),
     );
+
     s.insert(
         ann("Work", Value::display(block_header.work())).doc("Work that this block contributes."),
     );

@@ -1,8 +1,8 @@
 use std::convert::identity;
 use std::rc::Rc;
 
+use bitsplain::decode::{decode_input, Input};
 use bitsplain::tree::*;
-use bitsplain::Input;
 use gtk::glib::clone;
 use gtk::prelude::*;
 use gtk::{gdk, gio};
@@ -132,7 +132,7 @@ impl SimpleComponent for AppModel {
     fn update(&mut self, msg: Self::Input, sender: ComponentSender<Self>) {
         match msg {
             AppMsg::Open(s) => {
-                let candidates = bitsplain::decode::decode_input(Input::String(s));
+                let candidates = decode_input(Input::String(s));
 
                 if let Some(c) = candidates.into_iter().next() {
                     let annotations = Rc::new(c.annotations);

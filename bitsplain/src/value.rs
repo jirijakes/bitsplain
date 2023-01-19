@@ -1,3 +1,5 @@
+//! `Value` is intermediate type between domain-specific types and final presentation.
+
 use std::fmt::Display;
 
 use bitcoin::hashes::hex::ToHex;
@@ -10,7 +12,7 @@ use time::OffsetDateTime;
 use crate::types::Sat;
 
 /// Set of primitive values that can be formatted depending on the context.
-/// Parsing any binary data will result in a [`Tree`] of these values.
+/// Parsing any binary data will result in a [`Tree`](crate::tree::Tree) of these values.
 #[derive(Clone, Debug)]
 pub enum Value {
     /// Bitcoin address.

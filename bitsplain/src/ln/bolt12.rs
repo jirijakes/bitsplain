@@ -5,11 +5,9 @@ use crate::dsl::{ann, auto};
 use crate::nom::combinator::success;
 use crate::nom::multi::{length_value, many0};
 use crate::nom::number::complete::*;
-use crate::nom::IResult;
 use crate::parse::*;
 use crate::types::*;
 use crate::value::{ToValue, Value};
-use crate::Span;
 
 #[derive(Debug, Clone)]
 pub enum Offer {
@@ -34,7 +32,7 @@ impl ToValue for Offer {
     }
 }
 
-pub fn description(s: Span) -> IResult<Span, Offer> {
+pub fn description(s: Span) -> Parsed<Offer> {
     let (s, bytes) = many0(u8)(s)?;
     Ok((
         s,
@@ -42,7 +40,7 @@ pub fn description(s: Span) -> IResult<Span, Offer> {
     ))
 }
 
-pub fn issuer(s: Span) -> IResult<Span, Offer> {
+pub fn issuer(s: Span) -> Parsed<Offer> {
     let (s, bytes) = many0(u8)(s)?;
     Ok((
         s,
@@ -50,7 +48,7 @@ pub fn issuer(s: Span) -> IResult<Span, Offer> {
     ))
 }
 
-pub fn currency(s: Span) -> IResult<Span, Offer> {
+pub fn currency(s: Span) -> Parsed<Offer> {
     let (s, bytes) = many0(u8)(s)?;
     Ok((
         s,
@@ -62,22 +60,22 @@ pub fn currency(s: Span) -> IResult<Span, Offer> {
 // have to write a new one for each case.
 //
 // as_offer(chain_hash, Offer::ChainHash)
-pub fn offer_chain_hash(s: Span) -> IResult<Span, Offer> {
-    let (s, ch) = chain_hash(s)?;
+pub fn offer_chain_hash(s: Span) -> Parsed<Offer> {
+    let (s, ch) = chain_hash_be(s)?;
     Ok((s, Offer::ChainHash(ch)))
 }
 
-pub fn offer_node_id(s: Span) -> IResult<Span, Offer> {
+pub fn offer_node_id(s: Span) -> Parsed<Offer> {
     let (s, pk) = public_key(s)?;
     Ok((s, Offer::PublicKey(pk)))
 }
 
-pub fn other(s: Span) -> IResult<Span, Offer> {
+pub fn other(s: Span) -> Parsed<Offer> {
     let (s, bytes) = many0(u8)(s)?;
     Ok((s, Offer::Other(bytes.into())))
 }
 
-pub fn tlv_record(s: Span) -> IResult<Span, Offer> {
+pub fn tlv_record(s: Span) -> Parsed<Offer> {
     let (s, typ) = parse(u8, ann("Type", auto()))(s)?;
     let (s, length) = parse(u8, ann("Length", auto()))(s)?;
     let (s, value) = parse(
@@ -111,7 +109,7 @@ pub fn tlv_record(s: Span) -> IResult<Span, Offer> {
     Ok((s.with("annotation", annotation), value))
 }
 
-pub fn bolt12(s: Span) -> IResult<Span, String> {
+pub fn bolt12(s: Span) -> Parsed<String> {
     let (s, records) = parse(
         many0(parse(tlv_record, ann("TLV Record", Value::Nil))),
         ann("TLV Stream", Value::Nil),
