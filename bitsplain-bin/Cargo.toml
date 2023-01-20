@@ -2,8 +2,10 @@
 name = "bitsplain-bin"
 version = "0.1.0-alpha.1"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+license = "Apache-2.0 OR MIT"
+repository = "https://jirijakes.com/code/bitsplain"
+description = "User interfaces for bitsplain, library explaining Bitcoin-related binary data"
+keywords = ["bitcoin", "binary", "parsing", "GUI", "CLI"]
 
 [dependencies]
 bitsplain = { path = "../bitsplain" }
