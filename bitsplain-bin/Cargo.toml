@@ -8,7 +8,7 @@ description = "User interfaces for bitsplain, library explaining Bitcoin-related
 keywords = ["bitcoin", "binary", "parsing", "GUI", "CLI"]
 
 [dependencies]
-bitsplain = { path = "../bitsplain" }
+bitsplain = { version = "0.1.0-alpha.1", path = "../bitsplain" }
 clap = { version = "4.1.1", features = ["derive"] }
 config = "0.13.3"
 dirs = "4.0.0"
