@@ -72,6 +72,12 @@ impl Value {
         Value::Bytes(bytes.into())
     }
 
+    /// Creates value from a number.
+    #[inline]
+    pub fn num(num: impl Into<i128>) -> Value {
+        Value::Num(num.into())
+    }
+
     /// Creates textual value from anything that has [`Display`].
     #[inline]
     pub fn display<S: Display>(value: S) -> Value {

@@ -108,6 +108,8 @@ impl<T> From<String> for Make<T, String> {
 pub enum Reference {
     /// Reference to a web page.
     Www(String),
+    /// Reference to a BIP.
+    Bip(u16),
     // Code,
 }
 
@@ -135,6 +137,12 @@ impl<T> Ann<T> {
     /// Add reference to a web page; may be called repeatedly.
     pub fn www(mut self, s: impl AsRef<str>) -> Ann<T> {
         self.refs.push(Reference::Www(s.as_ref().into()));
+        self
+    }
+
+    /// Add reference to a BIP; may be called repeatedly.
+    pub fn bip(mut self, bipno: u16) -> Ann<T> {
+        self.refs.push(Reference::Bip(bipno));
         self
     }
 
