@@ -66,37 +66,35 @@ macro_rules! p {
     };
 }
 
+macro_rules! seq {
+    ($span: ident, $($parser: expr => $ann: literal),+) => {
+        $(p!($span, $parser, $ann));+
+    };
+}
+
+macro_rules! flag8 {
+    ($($idx: literal => $ann: literal),+) => {
+        flags(u8, &[$(($idx, ann($ann, auto()))),+])
+    };
+}
+
 // TODO: Tests from eclair / non-regression on channel_update
 pub fn channel_update(s: Span) -> Parsed<()> {
     let (s, _) = value(258, be_u16)(s)?;
-    p!(s, signature, "Signature");
-    p!(s, chain_hash_be, "Chain hash");
-    p!(s, short_channel_id, "Short channel ID");
-    p!(s, timestamp(be_u32), "Timestamp");
-    p!(
-        s,
-        flags(
-            u8,
-            &[
-                (0, ann("must_be_one", auto())),
-                (1, ann("dont_forward", auto())),
-            ],
-        ),
-        "Message flags"
+
+    seq!(s,
+         signature => "Signature",
+         chain_hash_be => "Chain hash",
+         short_channel_id => "Short channel ID",
+         timestamp(be_u32) => "Timestamp",
+         flag8!(0 => "must_be_one", 1 => "dont_forward") => "Message flags",
+         flag8!(0 => "direction", 1 => "disable") => "Channel flags",
+         be_u16 => "CLTV expiry delta",
+         be_u64 => "HTLC minimum msat",
+         be_u32 => "Fee base msat",
+         be_u32 => "Fee proportional millionths",
+         be_u64 => "HTLC maximum msat"
     );
-    p!(
-        s,
-        flags(
-            u8,
-            &[(0, ann("direction", auto())), (1, ann("disable", auto()))],
-        ),
-        "Channel flags"
-    );
-    p!(s, be_u16, "CLTV expiry delta");
-    p!(s, be_u64, "HTLC minimum msat");
-    p!(s, be_u32, "Fee base msat");
-    p!(s, be_u32, "Fee proportional millionths");
-    p!(s, be_u64, "HTLC maximum msat");
 
     Ok((s, ()))
 }
