@@ -60,39 +60,52 @@ pub fn node_announcement(s: Span) -> Parsed<()> {
     Ok((s, ()))
 }
 
-// TODO: Tests from eclair / non-regression on channel_update
-pub fn channel_update(s: Span) -> Parsed<()> {
-    let (s, _) = value(258, be_u16)(s)?;
-    let (s, _signature) = parse(signature, ann("Signature", auto()))(s)?;
-    let (s, _chain_hash) = parse(chain_hash_be, ann("Chain hash", auto()))(s)?;
-    let (s, _scid) = parse(short_channel_id, ann("Short channel ID", auto()))(s)?;
-    let (s, _timestamp) = parse(timestamp(be_u32), ann("Timestamp", auto()))(s)?;
-    let (s, _flags) = parse(
-        flags(
-            u8,
-            &[
-                (0, ann("must_be_one", auto())),
-                (1, ann("dont_forward", auto())),
-            ],
-        ),
-        ann("Message flags", auto()),
-    )(s)?;
-    let (s, _flags) = parse(
-        flags(
-            u8,
-            &[(0, ann("direction", auto())), (1, ann("disable", auto()))],
-        ),
-        ann("Channel flags", auto()),
-    )(s)?;
-    let (s, _cltv_expiry_delta) = parse(be_u16, ann("CLTV expiry delta", auto()))(s)?;
-    let (s, _htlc_minimum_msat) = parse(be_u64, ann("HTLC minimum msat", auto()))(s)?;
-    let (s, _fee_base_msat) = parse(be_u32, ann("Fee base msat", auto()))(s)?;
-    let (s, _fee_proportional_millionths) =
-        parse(be_u32, ann("Fee proportional millionths", auto()))(s)?;
-    let (s, _htlc_maximum_msat) = parse(be_u64, ann("HTLC maximum msat", auto()))(s)?;
-
-    Ok((s, ()))
+macro_rules! p {
+    ($parser: expr, $ann: literal) => {
+        parse($parser, ann($ann, auto()))
+    };
 }
+
+macro_rules! ins {
+    ($parser: expr => $ann: literal) => {
+        p!($parser, $ann)
+    };
+
+    ($expr: expr) => {
+        $expr
+    };
+}
+
+macro_rules! parser {
+    ($name: ident, $(($($item:tt)*)),+ ) => {
+        pub fn $name(s: Span) -> Parsed<()> {
+            $(let (s, _) = ins!($($item)*)(s)?;)+
+                Ok((s, ()))
+        }
+    };
+}
+
+macro_rules! flag8 {
+    ($($idx: literal => $ann: literal),+) => {
+        flags(u8, &[$(($idx, ann($ann, auto()))),+])
+    };
+}
+
+// TODO: Tests from eclair / non-regression on channel_update
+parser!(channel_update,
+        (value(258, be_u16)),
+        (signature => "Signature"),
+        (chain_hash_be => "Chain hash"),
+        (short_channel_id => "Short channel ID"),
+        (timestamp(be_u32) => "Timestamp"),
+        (flag8!(0 => "must_be_one", 1 => "dont_forward") => "Message flags"),
+        (flag8!(0 => "direction", 1 => "disable") => "Channel flags"),
+        (be_u16 => "CLTV expiry delta"),
+        (be_u64 => "HTLC minimum msat"),
+        (be_u32 => "Fee base msat"),
+        (be_u32 => "Fee proportional millionths"),
+        (be_u64 => "HTLC maximum msat")
+);
 
 pub fn channel_announcement(s: Span) -> Parsed<()> {
     let (s, _) = value(256, be_u16)(s)?;
