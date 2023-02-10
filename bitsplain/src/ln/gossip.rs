@@ -60,14 +60,30 @@ pub fn node_announcement(s: Span) -> Parsed<()> {
     Ok((s, ()))
 }
 
+// TODO: Tests from eclair / non-regression on channel_update
 pub fn channel_update(s: Span) -> Parsed<()> {
     let (s, _) = value(258, be_u16)(s)?;
     let (s, _signature) = parse(signature, ann("Signature", auto()))(s)?;
     let (s, _chain_hash) = parse(chain_hash_be, ann("Chain hash", auto()))(s)?;
     let (s, _scid) = parse(short_channel_id, ann("Short channel ID", auto()))(s)?;
     let (s, _timestamp) = parse(timestamp(be_u32), ann("Timestamp", auto()))(s)?;
-    let (s, _) = parse(u8, ann("Message flags", auto()))(s)?;
-    let (s, _flags) = parse(u8, ann("Channel flags", auto()))(s)?;
+    let (s, _flags) = parse(
+        flags(
+            u8,
+            &[
+                (0, ann("must_be_one", auto())),
+                (1, ann("dont_forward", auto())),
+            ],
+        ),
+        ann("Message flags", auto()),
+    )(s)?;
+    let (s, _flags) = parse(
+        flags(
+            u8,
+            &[(0, ann("direction", auto())), (1, ann("disable", auto()))],
+        ),
+        ann("Channel flags", auto()),
+    )(s)?;
     let (s, _cltv_expiry_delta) = parse(be_u16, ann("CLTV expiry delta", auto()))(s)?;
     let (s, _htlc_minimum_msat) = parse(be_u64, ann("HTLC minimum msat", auto()))(s)?;
     let (s, _fee_base_msat) = parse(be_u32, ann("Fee base msat", auto()))(s)?;

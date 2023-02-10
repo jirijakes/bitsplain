@@ -209,6 +209,16 @@ impl ToValue for &str {
     }
 }
 
+impl ToValue for bool {
+    fn to_value(&self) -> Value {
+        if *self {
+            Value::Num(1.into())
+        } else {
+            Value::Num(0.into())
+        }
+    }
+}
+
 impl ToValue for sha256d::Hash {
     fn to_value(&self) -> Value {
         Value::Hash(*self)

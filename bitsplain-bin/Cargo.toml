@@ -9,7 +9,7 @@ keywords = ["bitcoin", "binary", "parsing", "GUI", "CLI"]
 
 [dependencies]
 bitsplain = { version = "0.1.0-alpha.2", path = "../bitsplain" }
-clap = { version = "4.1.1", features = ["derive"] }
+clap = { version = "4.1.4", features = ["derive"] }
 config = "0.13.3"
 dirs = "4.0.0"
 gtk = { package = "gtk4", version = "0.5.5" }
@@ -18,7 +18,7 @@ human-size = "0.4.2"
 lazy_static = "1.4.0"
 pretty = { version = "0.11.3", features = ["termcolor"] }
 print_bytes = "1.1.0"
-relm4 = "0.5.0-rc.1"
+relm4 = "0.5.0-rc.2"
 serde = { version = "1.0.152", features = ["derive"] }
 termion = "2.0.1"
 time = { version = "0.3.17", features = ["formatting"] }

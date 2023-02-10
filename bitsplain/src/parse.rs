@@ -1,10 +1,13 @@
 //! Customization of [`nom`] parser and all related functions and types.
 
+use std::borrow::Borrow;
 use std::cell::RefCell;
 use std::collections::HashMap;
+use std::fmt::Debug;
 use std::ops::{Deref, RangeFrom, RangeTo};
 use std::rc::Rc;
 
+use nom::combinator::success;
 use nom::error::ParseError;
 use nom::{AsBytes, IResult, InputIter, InputLength, InputTake, Needed, Offset, Parser, Slice};
 
@@ -394,13 +397,51 @@ where
     }
 }
 
-pub fn parse<Parse, Error, Output, Fragment>(
-    mut parse: Parse,
-    ann: Ann<Output>,
-) -> impl FnMut(Annotated<Fragment>) -> IResult<Annotated<Fragment>, Output, Error>
+/// Parse flag bitfields by providing parser for numeric value and definitions
+/// of bit positions and their annotations. Result of the parser is the original
+/// numeric value.
+///
+/// ## Example
+///
+/// ```ignore
+///  let (s, flags) = parse(
+///        flags(u8,&[(0, ann("Flag 0", auto())), (1, ann("Flag 1", auto()))])
+///     )(s)?;
+///```
+pub fn flags<'a, Parse, Error, Output, Fragment>(
+    mut parse_num: Parse,
+    anns: &'a [(usize, Ann<bool>)],
+) -> impl FnMut(Annotated<Fragment>) -> IResult<Annotated<Fragment>, Output, Error> + 'a
 where
-    Parse: Parser<Annotated<Fragment>, Output, Error>,
+    Parse: Parser<Annotated<Fragment>, Output, Error> + 'a,
     Error: ParseError<Annotated<Fragment>>,
+    Output: Into<u64> + Copy,
+{
+    move |input: Annotated<Fragment>| {
+        let (span, out) = parse_num.parse(input)?;
+        let numeric = out.into();
+
+        let span = anns.iter().fold(span, |s, (idx, ann)| {
+            let parsed_flag: IResult<_, _, Error> = parse(success(numeric & 1 << idx > 0), ann)(s);
+            if let Ok((span, _flag)) = parsed_flag {
+                span
+            } else {
+                unreachable!("Parser won't fail here")
+            }
+        });
+
+        Ok((span, out))
+    }
+}
+
+pub fn parse<'a, Annotation, Parse, Error, Output, Fragment>(
+    mut parse: Parse,
+    ann: Annotation,
+) -> impl FnMut(Annotated<Fragment>) -> IResult<Annotated<Fragment>, Output, Error> + 'a
+where
+    Parse: Parser<Annotated<Fragment>, Output, Error> + 'a,
+    Error: ParseError<Annotated<Fragment>>,
+    Annotation: Borrow<Ann<Output>> + 'a,
 {
     move |mut input: Annotated<Fragment>| {
         let from = input.next_offset;
@@ -409,6 +450,8 @@ where
         input.tree = vec![];
         let (span, out) = parse.parse(input)?;
         let to = span.next_offset;
+
+        let ann = ann.borrow();
 
         // If the tree returned by parser does not have any new items,
         // we are in the leaf situation (parser did not produce any new branches).
