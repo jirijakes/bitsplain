@@ -60,14 +60,21 @@ pub fn node_announcement(s: Span) -> Parsed<()> {
     Ok((s, ()))
 }
 
+macro_rules! p {
+    ($span: ident, $parser: expr, $ann: literal) => {
+        let ($span, _) = parse($parser, ann($ann, auto()))($span)?;
+    };
+}
+
 // TODO: Tests from eclair / non-regression on channel_update
 pub fn channel_update(s: Span) -> Parsed<()> {
     let (s, _) = value(258, be_u16)(s)?;
-    let (s, _signature) = parse(signature, ann("Signature", auto()))(s)?;
-    let (s, _chain_hash) = parse(chain_hash_be, ann("Chain hash", auto()))(s)?;
-    let (s, _scid) = parse(short_channel_id, ann("Short channel ID", auto()))(s)?;
-    let (s, _timestamp) = parse(timestamp(be_u32), ann("Timestamp", auto()))(s)?;
-    let (s, _flags) = parse(
+    p!(s, signature, "Signature");
+    p!(s, chain_hash_be, "Chain hash");
+    p!(s, short_channel_id, "Short channel ID");
+    p!(s, timestamp(be_u32), "Timestamp");
+    p!(
+        s,
         flags(
             u8,
             &[
@@ -75,21 +82,21 @@ pub fn channel_update(s: Span) -> Parsed<()> {
                 (1, ann("dont_forward", auto())),
             ],
         ),
-        ann("Message flags", auto()),
-    )(s)?;
-    let (s, _flags) = parse(
+        "Message flags"
+    );
+    p!(
+        s,
         flags(
             u8,
             &[(0, ann("direction", auto())), (1, ann("disable", auto()))],
         ),
-        ann("Channel flags", auto()),
-    )(s)?;
-    let (s, _cltv_expiry_delta) = parse(be_u16, ann("CLTV expiry delta", auto()))(s)?;
-    let (s, _htlc_minimum_msat) = parse(be_u64, ann("HTLC minimum msat", auto()))(s)?;
-    let (s, _fee_base_msat) = parse(be_u32, ann("Fee base msat", auto()))(s)?;
-    let (s, _fee_proportional_millionths) =
-        parse(be_u32, ann("Fee proportional millionths", auto()))(s)?;
-    let (s, _htlc_maximum_msat) = parse(be_u64, ann("HTLC maximum msat", auto()))(s)?;
+        "Channel flags"
+    );
+    p!(s, be_u16, "CLTV expiry delta");
+    p!(s, be_u64, "HTLC minimum msat");
+    p!(s, be_u32, "Fee base msat");
+    p!(s, be_u32, "Fee proportional millionths");
+    p!(s, be_u64, "HTLC maximum msat");
 
     Ok((s, ()))
 }
