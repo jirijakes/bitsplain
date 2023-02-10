@@ -61,14 +61,27 @@ pub fn node_announcement(s: Span) -> Parsed<()> {
 }
 
 macro_rules! p {
-    ($span: ident, $parser: expr, $ann: literal) => {
-        let ($span, _) = parse($parser, ann($ann, auto()))($span)?;
+    ($parser: expr, $ann: literal) => {
+        parse($parser, ann($ann, auto()))
     };
 }
 
-macro_rules! seq {
-    ($span: ident, $($parser: expr => $ann: literal),+) => {
-        $(p!($span, $parser, $ann));+
+macro_rules! ins {
+    ($parser: expr => $ann: literal) => {
+        p!($parser, $ann)
+    };
+
+    ($expr: expr) => {
+        $expr
+    };
+}
+
+macro_rules! parser {
+    ($name: ident, $(($($item:tt)*)),+ ) => {
+        pub fn $name(s: Span) -> Parsed<()> {
+            $(let (s, _) = ins!($($item)*)(s)?;)+
+                Ok((s, ()))
+        }
     };
 }
 
@@ -79,25 +92,20 @@ macro_rules! flag8 {
 }
 
 // TODO: Tests from eclair / non-regression on channel_update
-pub fn channel_update(s: Span) -> Parsed<()> {
-    let (s, _) = value(258, be_u16)(s)?;
-
-    seq!(s,
-         signature => "Signature",
-         chain_hash_be => "Chain hash",
-         short_channel_id => "Short channel ID",
-         timestamp(be_u32) => "Timestamp",
-         flag8!(0 => "must_be_one", 1 => "dont_forward") => "Message flags",
-         flag8!(0 => "direction", 1 => "disable") => "Channel flags",
-         be_u16 => "CLTV expiry delta",
-         be_u64 => "HTLC minimum msat",
-         be_u32 => "Fee base msat",
-         be_u32 => "Fee proportional millionths",
-         be_u64 => "HTLC maximum msat"
-    );
-
-    Ok((s, ()))
-}
+parser!(channel_update,
+        (value(258, be_u16)),
+        (signature => "Signature"),
+        (chain_hash_be => "Chain hash"),
+        (short_channel_id => "Short channel ID"),
+        (timestamp(be_u32) => "Timestamp"),
+        (flag8!(0 => "must_be_one", 1 => "dont_forward") => "Message flags"),
+        (flag8!(0 => "direction", 1 => "disable") => "Channel flags"),
+        (be_u16 => "CLTV expiry delta"),
+        (be_u64 => "HTLC minimum msat"),
+        (be_u32 => "Fee base msat"),
+        (be_u32 => "Fee proportional millionths"),
+        (be_u64 => "HTLC maximum msat")
+);
 
 pub fn channel_announcement(s: Span) -> Parsed<()> {
     let (s, _) = value(256, be_u16)(s)?;
