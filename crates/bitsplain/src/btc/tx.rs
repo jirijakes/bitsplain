@@ -166,39 +166,6 @@ pub fn output_script(input: Span) -> Parsed<ScriptBuf> {
     Ok((s.with("datatype", "script"), script))
 }
 
-/*pub fn witness_structure(len: u64) -> impl Fn(Span) -> Parsed<Vec<Witness>> {
-    move |input: Span| {
-        input.insert(ann("Length", Value::Size(len)));
-        let (x, y) = length_count(
-            success(len),
-            parse(with("list", "enumerate", witness_stack), ann("x", "")),
-        )(input)?;
-        x.insert(ann("Length2", Value::Size(len)));
-        Ok((x, y))
-    }
-}
-
-pub fn witness_item(s: Span) -> Parsed<Vec<u8>> {
-    let (s, len) = parse(varint, ann("Length", |n: &u64| Value::Size(*n)))(s)?;
-    let (s, item) = parse(
-        length_count(success(len), be_u8),
-        ann("Witness Item", auto()),
-    )(s)?;
-    Ok((s, item))
-}
-
-pub fn witness_stack(s: Span) -> Parsed<Witness> {
-    let (s, len) = parse(varint, ann("Length", auto()))(s)?;
-    let (s, wd) = length_count(
-        success(len),
-        parse(
-            with("list", "enumerate", witness_item),
-            ann("q", Value::Nil),
-        ),
-    )(s)?;
-    Ok((s, Witness::from_slice(&wd)))
-}*/
-
 /// Parse one witness item.
 ///
 // TODO: in the future we might be able to interpret the witnesses
@@ -206,30 +173,42 @@ pub fn witness_stack(s: Span) -> Parsed<Witness> {
 // let us to do.
 pub fn witness_item(_vin: TxIn) -> impl Fn(Span) -> Parsed<Vec<u8>> {
     move |s: Span| {
+        let (s, len) = parse(varint, ann("Length", |n: &u64| Value::Size(*n)))(s)?;
         let (s, w) = parse(
-            with("list", "enumerate", length_count(varint, be_u8)),
-            ann("Witness item", auto()),
+            length_count(success(len), be_u8),
+            ann("Witness Data", auto()),
         )(s)?;
         Ok((s, w))
     }
 }
 
-fn witnesses(vins: Vec<TxIn>) -> impl Fn(Span) -> Parsed<Vec<Vec<Vec<u8>>>> {
+/// Parses one witness stack, i. e. all witness items associated with one input.
+pub fn witness_stack(vin: TxIn) -> impl Fn(Span) -> Parsed<Vec<Vec<u8>>> {
     move |s: Span| {
-        vins.iter().try_fold((s, vec![]), |(s, mut ws), vin| {
+        let (s, cnt) = parse(varint, ann("Count", auto()))(s)?;
+        length_count(
+            success(cnt),
+            parse(witness_item(vin.clone()), ann("Witness Item", Value::Nil)),
+        )(s)
+    }
+}
+
+/// Parses complete witness structure.
+fn witness_structure(vins: Vec<TxIn>) -> impl Fn(Span) -> Parsed<Vec<Vec<Vec<u8>>>> {
+    move |s: Span| {
+        s.insert(ann("Length", Value::Size(vins.len() as u64))); // FIXME: Does not render
+        let (s, w) = vins.iter().try_fold((s, vec![]), |(s, mut ws), vin| {
             parse(
-                with(
-                    "list",
-                    "enumerate",
-                    length_count(varint, witness_item(vin.clone())),
-                ),
-                ann("Witness", Value::Nil),
+                with("list", "enumerate", witness_stack(vin.clone())),
+                ann("Witness Stack", Value::Nil),
             )(s)
             .map(|(s, w)| {
                 ws.push(w);
                 (s, ws)
             })
-        })
+        })?;
+        s.insert(ann("Length 2", Value::Size(vins.len() as u64))); // FIXME: Does not render
+        Ok((s, w))
     }
 }
 
@@ -294,7 +273,10 @@ pub fn tx(s: Span) -> Parsed<Transaction> {
 
     // TODO: Improve annotations
     let (s, witnesses) = if flag == 1 {
-        parse(witnesses(vin.clone()), ann("Witness structure", Value::Nil))(s)?
+        parse(
+            witness_structure(vin.clone()),
+            ann("Witness structure", Value::Nil),
+        )(s)?
     } else {
         (s, vec![])
     };
@@ -307,7 +289,7 @@ pub fn tx(s: Span) -> Parsed<Transaction> {
 
     let (s, locktime) = parse(
         uint32,
-        ann("Locktime", auto())
+        ann("Lock Time", auto())
             .doc("Earliest time the transaction can be mined in to a block.")
             .splain(|cons: &u32| {
                 if *cons == 0 {
