@@ -1,0 +1,14 @@
+[package]
+name = "bitsplain_format"
+version = "0.1.0-alpha.2"
+edition = "2021"
+license = "Apache-2.0 OR MIT"
+repository = "https://jirijakes.com/code/bitsplain"
+description = "Output format for bitsplain, library explaining Bitcoin-related binary data"
+keywords = ["bitcoin", "binary", "parsing", "image"]
+
+[dependencies]
+clap = { version = "4.4.8", features = ["derive"] }
+serde = { version = "1.0.193", features = ["derive"] }
+termion = "2.0.3"
+thiserror = "1.0.50"

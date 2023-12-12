@@ -1,0 +1,40 @@
+[package]
+name = "bitsplain-bin"
+version = "0.1.0-alpha.2"
+edition = "2021"
+license = "Apache-2.0 OR MIT"
+repository = "https://jirijakes.com/code/bitsplain"
+description = "User interfaces for bitsplain, library explaining Bitcoin-related binary data"
+keywords = ["bitcoin", "binary", "parsing", "GUI", "CLI"]
+
+[dependencies]
+bitsplain = { version = "0.1.0-alpha.2", path = "../bitsplain" }
+bitsplain_format = { version = "0.1.0-alpha.2", path = "../bitsplain-format" }
+bitsplain_format_html = { version = "0.1.0-alpha.2", path = "../bitsplain-format-html" }
+bitsplain_format_image = { version = "0.1.0-alpha.2", path = "../bitsplain-format-image" }
+clap = { version = "4.4.8", features = ["derive"] }
+# colors-transform = "0.2.11"
+config = "0.13.4"
+dirs = "5.0.1"
+gtk = { package = "gtk4", version = "0.7.3" }
+hex = "0.4.3"
+human-size = "0.4.3"
+lazy_static = "1.4.0"
+pretty = { version = "0.12.3", features = ["termcolor"] }
+print_bytes = "1.2.0"
+relm4 = "0.7.0-beta.2"
+# resvg = "0.32.0"
+serde = { version = "1.0.193", features = ["derive"] }
+# svg = "0.13.1"
+termion = "2.0.3"
+time = { version = "0.3.30", features = ["formatting"] }
+# wkhtmlapp = { git = "https://github.com/jirijakes/wkhtmlapp", branch = "capture-stdout" }
+# ttf-parser = "0.19.0"
+
+[[bin]]
+name = "bitsplain"
+path = "src/cli/main.rs"
+
+[[bin]]
+name = "bitsplain-gtk"
+path = "src/gtk/main.rs"

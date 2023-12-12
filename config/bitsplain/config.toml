@@ -9,6 +9,17 @@ show = true
 foreground = "lightblack"
 style = ["italic"]
 
+[format.pretty.virtual]
+show = true
+style = ["bold", "faint"]
+pre = "("
+post = ")"
+
+[format.pretty.segment]
+show = false
+foreground = "yellow"
+style = []
+
 [format.pretty.ids]
 show = true
 style = []
