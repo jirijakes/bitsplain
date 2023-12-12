@@ -74,10 +74,11 @@ pub fn tx_out(s: Span) -> Parsed<TxOut> {
     Ok((s, tx_out))
 }
 
+/// Parses all transaction outputs.
 pub fn tx_outs(input: Span) -> Parsed<Vec<TxOut>> {
     let (s, vout_n) = parse(
         varint,
-        ann("Length", auto()).doc("Number of outputs of this transaction"),
+        ann("Output Count", auto()).doc("Number of outputs of this transaction"),
     )(input)?;
     many_m_n(
         vout_n as usize,
@@ -86,10 +87,11 @@ pub fn tx_outs(input: Span) -> Parsed<Vec<TxOut>> {
     )(s)
 }
 
+/// Parses all transaction inputs.
 pub fn tx_ins(input: Span) -> Parsed<Vec<TxIn>> {
     let (s, vin_n) = parse(
         varint,
-        ann("Length", auto()).doc("Number of inputs participating in this transaction"),
+        ann("Input Count", auto()).doc("Number of inputs participating in this transaction"),
     )(input)?;
     many_m_n(
         vin_n as usize,
@@ -159,6 +161,16 @@ pub fn output_script(input: Span) -> Parsed<ScriptBuf> {
                 )
                 .bip(141)
                 .splain("Witness version 0 and 32-byte program indicate P2WSH output. In P2WSH output, witness program is SHA256 hash of script."),
+            );
+        } else if script.is_p2tr() {
+            s.insert(ann("Length of Witness Program", Value::Size(32)));
+            s.insert(
+                ann(
+                    "Witness Program",
+                    Value::bytes(script.as_bytes()[2..].to_vec()),
+                )
+                    .bip(341)
+                    .splain("Witness version 1 and 32-byte program indicate P2TR output. In P2TR output, witness program represents public key."),
             );
         };
     }
@@ -271,11 +283,10 @@ pub fn tx(s: Span) -> Parsed<Transaction> {
     let (s, mut vin) = parse(tx_ins, ann("Input List", Value::Nil))(s)?;
     let (s, vout) = parse(tx_outs, ann("Output List", Value::Nil))(s)?;
 
-    // TODO: Improve annotations
     let (s, witnesses) = if flag == 1 {
         parse(
             witness_structure(vin.clone()),
-            ann("Witness structure", Value::Nil),
+            ann("Witness Structure", Value::Nil),
         )(s)?
     } else {
         (s, vec![])
