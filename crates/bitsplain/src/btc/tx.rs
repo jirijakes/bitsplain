@@ -33,14 +33,42 @@ pub fn tx_out(s: Span) -> Parsed<TxOut> {
     let bm = s.bookmark();
     let (s, script) = parse(output_script, ann("Output Script", Value::Nil))(s)?;
 
-    //    s.insert_before(
-    s.insert_at(
-        &bm,
-        ann(
-            "Address",
-            Value::Addr(Address::from_script(&script, Network::Bitcoin).ok()),
-        ),
-    );
+    let address = Address::from_script(&script, Network::Bitcoin).ok();
+    let address_str = address.as_ref().map(|a| a.to_string());
+
+    if script.is_p2tr() {
+        if let Some(addr) = address_str {
+            s
+            .insert_at(
+                &bm,
+                ann("Address", Value::Addr(address))
+                    .splain(
+                        format!(
+                            "Address of P2TR output is Bech32m encoding of witness program, i. e. {addr} = Bech32m(human_readable_part = \"bc\", witness_version = 1, data = {})",
+                            ::hex::encode(&script.as_bytes()[2..])
+                        )
+                    )
+                    .bip(350)
+            );
+        }
+    } else if script.is_p2wpkh() {
+        if let Some(addr) = address_str {
+            s
+            .insert_at(
+                &bm,
+                ann("Address", Value::Addr(address))
+                    .splain(
+                        format!(
+                            "Address of P2WPKH output is Bech32 encoding of witness program, i. e. {addr} = Bech32(human_readable_part = \"bc\", witness_version = 0, data = {})",
+                            ::hex::encode(&script.as_bytes()[2..])
+                        )
+                    )
+                    .bip(173)
+            );
+        }
+    } else {
+        s.insert_at(&bm, ann("Address", Value::Addr(address)));
+    }
 
     let script_type = if script.is_p2pk() {
         "P2PK"
