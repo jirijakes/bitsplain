@@ -66,6 +66,12 @@ pub fn tx_out(s: Span) -> Parsed<TxOut> {
                     .bip(173)
             );
         }
+    } else if script.is_multisig() {
+        s.insert_at(
+            &bm,
+            ann("Address", Value::Addr(address))
+                .splain("Bare multisig outputs do not have a concept of addresses."),
+        );
     } else {
         s.insert_at(&bm, ann("Address", Value::Addr(address)));
     }
@@ -84,6 +90,8 @@ pub fn tx_out(s: Span) -> Parsed<TxOut> {
         "P2TR"
     } else if script.is_op_return() {
         "OP_RETURN"
+    } else if script.is_multisig() {
+        "MULTISIG"
     } else {
         "NSTD"
     };
