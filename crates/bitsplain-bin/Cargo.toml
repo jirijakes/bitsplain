@@ -12,7 +12,7 @@ bitsplain = { version = "0.1.0-alpha.2", path = "../bitsplain" }
 bitsplain_format = { version = "0.1.0-alpha.2", path = "../bitsplain-format" }
 bitsplain_format_html = { version = "0.1.0-alpha.2", path = "../bitsplain-format-html" }
 bitsplain_format_image = { version = "0.1.0-alpha.2", path = "../bitsplain-format-image" }
-clap = { version = "4.4.11", features = ["derive"] }
+clap = { version = "4.4.18", features = ["derive"] }
 # colors-transform = "0.2.11"
 config = "0.13.4"
 dirs = "5.0.1"
@@ -24,10 +24,10 @@ pretty = { version = "0.12.3", features = ["termcolor"] }
 print_bytes = "1.2.0"
 relm4 = "0.7.0-beta.2"
 # resvg = "0.32.0"
-serde = { version = "1.0.193", features = ["derive"] }
+serde = { version = "1.0.195", features = ["derive"] }
 # svg = "0.13.1"
-termion = "2.0.3"
-time = { version = "0.3.30", features = ["formatting"] }
+termion = "3.0.0"
+time = { version = "0.3.31", features = ["formatting"] }
 # wkhtmlapp = { git = "https://github.com/jirijakes/wkhtmlapp", branch = "capture-stdout" }
 # ttf-parser = "0.19.0"
 
