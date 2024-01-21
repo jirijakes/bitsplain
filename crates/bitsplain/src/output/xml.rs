@@ -1,8 +1,10 @@
+use nom::AsBytes;
 use xml_builder::{XMLBuilder, XMLElement, XMLVersion};
 
+use crate::decode::Candidate;
 use crate::tree::{Information, Leaf, Node, Tree};
 
-pub fn tree_to_xml(tree: &Tree) {
+pub fn tree_to_xml(candidate: &Candidate) {
     let mut xml = XMLBuilder::new()
         .version(XMLVersion::XML1_1)
         .encoding("UTF-8".into())
@@ -10,24 +12,28 @@ pub fn tree_to_xml(tree: &Tree) {
 
     let mut nodes = XMLElement::new("tree");
 
-    nodes_to_xml(tree, &mut nodes);
+    nodes_to_xml(
+        &candidate.annotations,
+        candidate.data.as_bytes(),
+        &mut nodes,
+    );
 
     xml.set_root_element(nodes);
 
     xml.generate(std::io::stdout()).unwrap();
 }
 
-fn nodes_to_xml(nodes: &[Node], element: &mut XMLElement) {
+fn nodes_to_xml(nodes: &[Node], data: &[u8], element: &mut XMLElement) {
     for node in nodes {
-        element.add_child(node_to_xml(node)).unwrap();
+        element.add_child(node_to_xml(node, data)).unwrap();
     }
 }
 
-fn node_to_xml(node: &Node) -> XMLElement {
+fn node_to_xml(node: &Node, data: &[u8]) -> XMLElement {
     match node {
         Node::Group {
             path,
-            location,
+            location: _,
             information,
             children,
         } => {
@@ -37,19 +43,36 @@ fn node_to_xml(node: &Node) -> XMLElement {
             element.add_child(path_el).unwrap();
             attach_information(information, &mut element);
             let mut children_element = XMLElement::new("children");
-            nodes_to_xml(children, &mut children_element);
+            nodes_to_xml(children, data, &mut children_element);
             element.add_child(children_element).unwrap();
             element
         }
-        Node::Leaf(leaf) => {
+        Node::Leaf(Leaf::Real(leaf)) => {
             let mut element = XMLElement::new("leaf");
-            attach_information(leaf.information(), &mut element);
+            attach_data(&data[leaf.location.range()], &mut element);
+            attach_information(&leaf.information, &mut element);
+            element
+        }
+        Node::Leaf(Leaf::Virtual(leaf)) => {
+            let mut element = XMLElement::new("leaf");
+            element.add_attribute("virtual", "true");
+            attach_information(&leaf.information, &mut element);
             element
         }
     }
 }
 
+fn attach_data(data: &[u8], element: &mut XMLElement) {
+    let mut data_el = XMLElement::new("data");
+    data_el.add_text(hex::encode(data)).unwrap();
+    element.add_child(data_el).unwrap();
+}
+
 fn attach_information(information: &Information, element: &mut XMLElement) {
+    let mut value = XMLElement::new("value");
+    value.add_text(information.value.preview()).unwrap();
+    element.add_child(value).unwrap();
+
     let mut label = XMLElement::new("label");
     label.add_text(information.label.clone()).unwrap();
     element.add_child(label).unwrap();
