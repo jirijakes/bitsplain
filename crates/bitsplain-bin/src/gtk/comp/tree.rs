@@ -83,7 +83,7 @@ impl Component for TreeModel {
 
     fn init(
         _annotations: Self::Init,
-        root: &Self::Root,
+        root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let model = TreeModel::Empty;

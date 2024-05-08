@@ -8,15 +8,15 @@ description = "Bitsplain helps understand Bitcoin-related binary data"
 keywords = ["bitcoin", "binary", "parsing"]
 
 [dependencies]
-base64 = "0.21.7"
-bech32 = "0.9.1"
-bitcoin = "0.31.1"
-bytes = "1.5.0"
-hex = "0.4.3"
-inventory = "0.3.14"
-lightning = "0.0.120"
-nom = "7.1.3"
-num-bigint = "0.4.4"
-rust_decimal = "1.33.1"
-time = { version = "0.3.31", features = ["formatting"] }
-xml-builder = "0.5.2"
+base64 = "0.21"
+bech32 = "0.9"
+bitcoin = "0.31"
+bytes = "1.6"
+hex = "0.4"
+inventory = "0.3"
+lightning = "0.0.123-rc1"
+nom = "7.1"
+num-bigint = "0.4"
+rust_decimal = "1.35"
+time = { version = "0.3", features = ["formatting"] }
+xml-builder = "0.5"

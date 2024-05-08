@@ -81,7 +81,7 @@ impl SimpleComponent for AppModel {
 
     fn init(
         candidate: Self::Init,
-        root: &Self::Root,
+        root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let doc: Controller<DocModel> = DocModel::builder().launch(()).detach();
