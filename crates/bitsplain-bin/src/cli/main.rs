@@ -79,7 +79,7 @@ fn main() {
                     bitsplain_format_image::render(candidate, &ctx, &mut output).unwrap()
                 }
                 Format::Json => todo!(),
-                Format::Xml => bitsplain::output::xml::tree_to_xml(&candidate.annotations),
+                Format::Xml => bitsplain::output::xml::tree_to_xml(&candidate),
             }
         });
 }
