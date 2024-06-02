@@ -14,7 +14,7 @@ bitcoin = "0.31"
 bytes = "1.6"
 hex = "0.4"
 inventory = "0.3"
-lightning = "0.0.123-rc1"
+lightning = { git = "https://github.com/lightningdevkit/rust-lightning" }
 nom = "7.1"
 num-bigint = "0.4"
 rust_decimal = "1.35"

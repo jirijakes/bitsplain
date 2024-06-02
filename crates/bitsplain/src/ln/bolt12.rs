@@ -11,7 +11,7 @@ use crate::value::{ToValue, Value};
 
 #[derive(Debug, Clone)]
 pub enum Offer {
-    ChainHash(ChainHash),
+    ChainHashes(Vec<ChainHash>),
     Description(String),
     Issuer(String),
     Currency(String),
@@ -22,7 +22,7 @@ pub enum Offer {
 impl ToValue for Offer {
     fn to_value(&self) -> Value {
         match self {
-            Offer::ChainHash(s) => s.to_value(),
+            Offer::ChainHashes(s) => Value::text(format!("{:?}", s)),
             Offer::Description(s) => Value::text(s),
             Offer::Issuer(s) => Value::text(s),
             Offer::Currency(s) => Value::text(s),
@@ -60,9 +60,9 @@ pub fn currency(s: Span) -> Parsed<Offer> {
 // have to write a new one for each case.
 //
 // as_offer(chain_hash, Offer::ChainHash)
-pub fn offer_chain_hash(s: Span) -> Parsed<Offer> {
-    let (s, ch) = chain_hash_be(s)?;
-    Ok((s, Offer::ChainHash(ch)))
+pub fn offer_chain_hashes(s: Span) -> Parsed<Offer> {
+    let (s, chs) = many0(chain_hash_be)(s)?;
+    Ok((s, Offer::ChainHashes(chs)))
 }
 
 pub fn offer_node_id(s: Span) -> Parsed<Offer> {
@@ -82,7 +82,7 @@ pub fn tlv_record(s: Span) -> Parsed<Offer> {
         length_value(
             success(length),
             match typ {
-                2 => offer_chain_hash,
+                2 => offer_chain_hashes,
                 6 => currency,
                 10 => description,
                 18 => issuer,
@@ -94,7 +94,7 @@ pub fn tlv_record(s: Span) -> Parsed<Offer> {
     )(s)?;
 
     let annotation = match typ {
-        2 => "Offer chain",
+        2 => "Offer chains",
         4 => "Offer metadata",
         6 => "Offer currency",
         8 => "Offer amount",

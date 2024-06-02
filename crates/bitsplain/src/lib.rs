@@ -34,7 +34,7 @@ pub mod value;
 
 mod btc;
 pub mod output;
-// mod ln; <- Waiting for new version which depends on 0.30+
+mod ln; //<- Waiting for new version which depends on 0.30+
 
 /// Registers new decoder, defined by parser function, under a specified name.
 /// Optionally a condidition, in form of a pattern match, can be added.
@@ -100,7 +100,6 @@ decoder!(
     crate::btc::datatypes::script
 ); // without script_len1
 
-/*
 decoder!(
     title = "Lightning Network channel announcement",
     group = "ln",
@@ -122,12 +121,12 @@ decoder!(
     crate::ln::gossip::node_announcement
 );
 
-decoder!(
-    title = "Lightning Network gossip timestamp filter",
-    group = "ln",
-    symbol = "ts_filter",
-    crate::ln::gossip::gossip_timestamp_filter
-);
+// decoder!(
+//     title = "Lightning Network gossip timestamp filter",
+//     group = "ln",
+//     symbol = "ts_filter",
+//     crate::ln::gossip::gossip_timestamp_filter
+// );
 
 decoder!(
     title = "Lightning Network BOLT 12 offer",
@@ -152,7 +151,7 @@ decoder!(
     crate::ln::bolt12::bolt12,
     crate::binary::Binary::Bech32(hrp, _ ) if hrp == "lni",
 );
-*/
+
 decoder!(
     title = "BIP-47 payment code",
     group = "btc",

@@ -10,21 +10,21 @@ use crate::parse::*;
 use crate::types::*;
 use crate::value::Value;
 
-pub fn gossip_timestamp_filter(s: Span) -> Parsed<GossipTimestampFilter> {
-    let (s, _) = value(265, be_u16)(s)?;
-    let (s, chain_hash) = parse(chain_hash_be, ann("Chain hash", auto()))(s)?;
-    let (s, first_timestamp) = parse(timestamp(be_u32), ann("First timestamp", auto()))(s)?;
-    let (s, timestamp_range) = parse(be_u32, ann("Timestamp range", auto()))(s)?;
+// pub fn gossip_timestamp_filter(s: Span) -> Parsed<GossipTimestampFilter> {
+//     let (s, _) = value(265, be_u16)(s)?;
+//     let (s, chain_hash) = parse(chain_hash_be, ann("Chain hash", auto()))(s)?;
+//     let (s, first_timestamp) = parse(timestamp(be_u32), ann("First timestamp", auto()))(s)?;
+//     let (s, timestamp_range) = parse(be_u32, ann("Timestamp range", auto()))(s)?;
 
-    Ok((
-        s,
-        GossipTimestampFilter {
-            chain_hash: chain_hash.block_hash,
-            first_timestamp: first_timestamp.unix_timestamp() as u32,
-            timestamp_range,
-        },
-    ))
-}
+//     Ok((
+//         s,
+//         GossipTimestampFilter {
+//             chain_hash: chain_hash.block_hash,
+//             first_timestamp: first_timestamp.unix_timestamp() as u32,
+//             timestamp_range,
+//         },
+//     ))
+// }
 
 pub fn node_announcement(s: Span) -> Parsed<()> {
     let (s, _) = value(257, be_u16)(s)?;
