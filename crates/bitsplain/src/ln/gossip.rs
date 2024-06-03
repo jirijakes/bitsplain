@@ -60,52 +60,74 @@ pub fn node_announcement(s: Span) -> Parsed<()> {
     Ok((s, ()))
 }
 
-macro_rules! p {
-    ($parser: expr, $ann: literal) => {
-        parse($parser, ann($ann, auto()))
-    };
+pub fn channel_update(s: Span) -> Parsed<()> {
+    let (s, _) = value(258, be_u16)(s)?;
+    let (s, _) = parse(signature, ann("Signature", auto()))(s)?;
+    let (s, _) = parse(chain_hash_be, ann("Chain hash", auto()))(s)?;
+    let (s, _) = parse(short_channel_id, ann("Short channel ID", auto()))(s)?;
+    let (s, _) = parse(timestamp(be_u32), ann("Timestamp", auto()))(s)?;
+    let (s, _) = parse(
+        flags(
+            u8,
+            &[
+                (0, ann("must_be_one", auto()).doc("Ignored. It used to indicate presence of 'HTLC maximum msat' field, however nowadays it is always present.")),
+                (1, ann("dont_forward", auto()).doc("Indicates whether channel has been announced or not yet and thus whether this update may be forwarded.")),
+            ],
+        ),
+        ann("Message flags", auto()),
+    )(s)?;
+    let (s, _) = parse(
+        flags(
+            u8,
+            &[
+                (
+                    0,
+                    ann("direction", auto())
+                        .doc("Direction this update refers to.")
+                        .splain(|dir: &bool| {
+                            if *dir {
+                                String::from("1 (true): node_id_2 is originator of the message.")
+                            } else {
+                                String::from("0 (false): node_id_1 is originator of the message.")
+                            }
+                        }),
+                ),
+                (
+                    1,
+                    ann("disable", auto())
+                        .doc("Whether the channel should be temporarily disabled.")
+                        .splain(|disable: &bool| {
+                            if *disable {
+                                String::from("1 (true): channel should be disabled.")
+                            } else {
+                                String::from("0 (false): channel should not be disabled.")
+                            }
+                        }),
+                ),
+            ],
+        ),
+        ann("Channel flags", auto()),
+    )(s)?;
+    let (s, _) = parse(
+        be_u16,
+        ann("CLTV expiry delta", auto())
+            .doc("Number of blocks to substract from incoming HTLCs' cltv_expiry."),
+    )(s)?;
+    let (s, _) = parse(
+        be_u64,
+        ann("HTLC minimum msat", auto())
+            .doc("Minimum HTLC value in millisatoshi that the channel peer will accept."),
+    )(s)?;
+    let (s, _) = parse(be_u32, ann("Fee base msat", auto()))(s)?;
+    let (s, _) = parse(be_u32, ann("Fee proportional millionths", auto()))(s)?;
+    let (s, _) = parse(
+        be_u64,
+        ann("HTLC maximum msat", auto()).doc(
+            "Maximum value in millisatoshi that the channel peer will send for a single HTLC.",
+        ),
+    )(s)?;
+    Ok((s, ()))
 }
-
-macro_rules! ins {
-    ($parser: expr => $ann: literal) => {
-        p!($parser, $ann)
-    };
-
-    ($expr: expr) => {
-        $expr
-    };
-}
-
-macro_rules! parser {
-    ($name: ident, $(($($item:tt)*)),+ ) => {
-        pub fn $name(s: Span) -> Parsed<()> {
-            $(let (s, _) = ins!($($item)*)(s)?;)+
-                Ok((s, ()))
-        }
-    };
-}
-
-macro_rules! flag8 {
-    ($($idx: literal => $ann: literal),+) => {
-        flags(u8, &[$(($idx, ann($ann, auto()))),+])
-    };
-}
-
-// TODO: Tests from eclair / non-regression on channel_update
-parser!(channel_update,
-        (value(258, be_u16)),
-        (signature => "Signature"),
-        (chain_hash_be => "Chain hash"),
-        (short_channel_id => "Short channel ID"),
-        (timestamp(be_u32) => "Timestamp"),
-        (flag8!(0 => "must_be_one", 1 => "dont_forward") => "Message flags"),
-        (flag8!(0 => "direction", 1 => "disable") => "Channel flags"),
-        (be_u16 => "CLTV expiry delta"),
-        (be_u64 => "HTLC minimum msat"),
-        (be_u32 => "Fee base msat"),
-        (be_u32 => "Fee proportional millionths"),
-        (be_u64 => "HTLC maximum msat")
-);
 
 pub fn channel_announcement(s: Span) -> Parsed<()> {
     let (s, _) = value(256, be_u16)(s)?;
