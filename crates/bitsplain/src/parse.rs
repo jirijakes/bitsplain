@@ -205,18 +205,18 @@ impl<Fragment> Annotated<Fragment> {
         });
     }
 
-    /// Replace annotations by data field 'annotation', if it exsts, and bake
+    /// Replace annotations by data field 'annotation' if it exists and bake
     /// enumerations. This allows the specify annotation ex post.
     fn bake_annotations(tree: &mut Node, enumeration: usize) {
         match tree {
             Node::Leaf(Leaf::Real(RealLeaf { information, .. })) => {
-                if let Some(x) = information.data.remove("annotation") {
-                    information.label = x;
+                if let Some(annotation) = information.data.remove("annotation") {
+                    information.label = annotation;
                 };
             }
             Node::Leaf(Leaf::Virtual(VirtualLeaf { information, .. })) => {
-                if let Some(x) = information.data.remove("annotation") {
-                    information.label = x;
+                if let Some(annotation) = information.data.remove("annotation") {
+                    information.label = annotation;
                 };
             }
             Node::Group {
@@ -224,15 +224,23 @@ impl<Fragment> Annotated<Fragment> {
                 children,
                 ..
             } => {
-                if let Some(x) = information.data.remove("annotation") {
-                    information.label = x;
+                if let Some(annotation) = information.data.remove("annotation") {
+                    information.label = annotation;
                 } else if information.has_data("list", "enumerate") {
                     information.label = enumeration.to_string();
                 };
-                children
-                    .iter_mut()
-                    .enumerate()
-                    .for_each(|(en, c)| Self::bake_annotations(c, en));
+                children.iter_mut().fold(0, |mut index, c| {
+                    // Bake child's annotations.
+                    Self::bake_annotations(c, index);
+
+                    // Increase index if the child is to be enumerated. Other children
+                    // will have their own annotation.
+                    if c.information().has_data("list", "enumerate") {
+                        index += 1;
+                    }
+
+                    index
+                });
             }
         }
     }
