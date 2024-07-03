@@ -45,6 +45,25 @@ pub fn pretty_tree(t: &Node, data: &[u8], ctx: &Ctx) -> RcDoc<'static, ColorSpec
     }
 }
 
+/// Render group of tags.
+fn pretty_tags(tags: &[Tag], ctx: &Ctx) -> RcDoc<'static, ColorSpec> {
+    if tags.is_empty() {
+        RcDoc::nil()
+    } else {
+        RcDoc::space().append(RcDoc::intersperse(
+            tags.iter().map(|tag| {
+                RcDoc::text(format!(
+                    "{} {} {}",
+                    ctx.settings.format.pretty.tag.font,
+                    tag.label,
+                    style::Reset
+                ))
+            }),
+            RcDoc::space(),
+        ))
+    }
+}
+
 /// Render group.
 fn pretty_group(
     path: &[String],
@@ -55,22 +74,13 @@ fn pretty_group(
     ctx: &Ctx,
 ) -> RcDoc<'static, ColorSpec> {
     RcDoc::text(format!(
-            "{}{}{}{}:",
-            style::Bold,
-            style::Faint,
-            information.label,
-            style::Reset
-        ))
-        .append(if let Some(tag) = information.tags.first() {
-            RcDoc::space().append(RcDoc::text(format!(
-                "{} {} {}",
-                ctx.settings.format.pretty.tag.font,
-                tag.label,
-                style::Reset
-            )))
-        } else {
-            RcDoc::nil()
-        })
+        "{}{}{}{}:",
+        style::Bold,
+        style::Faint,
+        information.label,
+        style::Reset
+    ))
+	.append(pretty_tags(&information.tags, ctx))
         .append(RcDoc::space())
         .append(pretty_value(&information.value, ctx))
         .append(if ctx.detail == Detail::Debug {
@@ -122,16 +132,7 @@ fn pretty_real_leaf(
     .append(RcDoc::as_string(":"))
     .append(RcDoc::space())
     .append(pretty_value(&information.value, ctx))
-    .append(if let Some(tag) = information.tags.first() {
-        RcDoc::space().append(RcDoc::text(format!(
-            "{} {} {}",
-            ctx.settings.format.pretty.tag.font,
-            tag.label,
-            style::Reset
-        )))
-    } else {
-        RcDoc::nil()
-    })
+    .append(pretty_tags(&information.tags, ctx))
     .append(if ctx.detail == Detail::Debug {
         RcDoc::text(format!(
             "          {}{{from={}, to={}, len={}, index={}, path={}, data={:?}}}{}",
