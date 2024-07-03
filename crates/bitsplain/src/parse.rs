@@ -284,6 +284,28 @@ impl<Fragment> Annotated<Fragment> {
         }
     }
 
+    /// Add a tag to the current span if condition is met.
+    #[must_use]
+    #[inline]
+    pub fn add_tag_cond(self, condition: bool, tag: Tag) -> Self {
+        if condition {
+            let mut tags = self.tags;
+            tags.push(tag);
+            Annotated {
+                next_index: self.next_index,
+                next_offset: self.next_offset,
+                next_fragment: self.next_fragment,
+                data: self.data,
+                tags,
+                tree: self.tree,
+                appendices: self.appendices,
+                last_range: self.last_range,
+            }
+        } else {
+            self
+        }
+    }
+
     #[must_use]
     #[inline]
     pub fn with(self, key: &'static str, value: &'static str) -> Self {

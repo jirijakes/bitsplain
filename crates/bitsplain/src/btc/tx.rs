@@ -96,16 +96,25 @@ pub fn tx_out(s: Span) -> Parsed<TxOut> {
         "NSTD"
     };
 
+    let s = s
+        .add_tag(Tag {
+            label: script_type.to_string(),
+            color: None,
+            doc: None,
+        })
+        .add_tag_cond(
+            !script.is_op_return() && script.dust_value() == value.amount(),
+            Tag {
+                label: "DUST".to_string(),
+                color: None,
+                doc: None,
+            },
+        );
+
     let tx_out = TxOut {
         value: value.amount(),
         script_pubkey: script,
     };
-
-    let s = s.add_tag(Tag {
-        label: script_type.to_string(),
-        color: None,
-        doc: None,
-    });
 
     Ok((s, tx_out))
 }
