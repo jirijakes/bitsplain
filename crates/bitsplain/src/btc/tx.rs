@@ -76,6 +76,16 @@ pub fn tx_out(s: Span) -> Parsed<TxOut> {
         s.insert_at(&bm, ann("Address", Value::Addr(address)));
     }
 
+    if script.is_op_return() {
+        s.insert_at(
+            &bm,
+            ann(
+                "Data",
+                Value::display(String::from_utf8_lossy(script.as_bytes())),
+            ),
+        );
+    }
+
     let script_type = if script.is_p2pk() {
         "P2PK"
     } else if script.is_p2sh() {
