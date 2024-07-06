@@ -387,7 +387,7 @@ where
 
     #[inline]
     fn take_split(&self, count: usize) -> (Self, Self) {
-        (self.slice(count..), self.slice(..count))
+        (self.slice(..count), self.slice(count..))
     }
 }
 

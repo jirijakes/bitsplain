@@ -33,8 +33,8 @@ pub mod types;
 pub mod value;
 
 mod btc;
-pub mod output;
-mod ln; //<- Waiting for new version which depends on 0.30+
+mod ln;
+pub mod output; //<- Waiting for new version which depends on 0.30+
 
 /// Registers new decoder, defined by parser function, under a specified name.
 /// Optionally a condidition, in form of a pattern match, can be added.
