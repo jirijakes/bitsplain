@@ -547,17 +547,27 @@ where
     }
 }
 
-pub fn parse_slice<'a, Annotation, Parse, Error, Output, Fragment>(
-    length: usize,
+/// Applies `parse` to only first `length` bytes. It is similar to nom's `length_value`, however
+/// it returns span produce by `parse` (nom's `length_value` returns span of the rest and therefore
+/// all annotations produced by `parse` were lost).
+pub fn parse_slice<'a, Parse, Error, Output, Fragment, Length>(
+    length: Length,
     mut parse: Parse,
-    ann: Annotation,
 ) -> impl FnMut(Annotated<Fragment>) -> IResult<Annotated<Fragment>, Output, Error> + 'a
 where
     Parse: Parser<Annotated<Fragment>, Output, Error> + 'a,
     Error: ParseError<Annotated<Fragment>>,
-    Annotation: Borrow<Ann<Output>> + 'a,
+    Length: Into<usize> + Copy + 'a,
+    Annotated<Fragment>: InputTake + Slice<RangeFrom<usize>> + Slice<RangeTo<usize>>,
 {
-    move |mut input: Annotated<Fragment>| todo!()
+    move |input: Annotated<Fragment>| {
+        let (s, rest) = input.take_split(length.into());
+        let (mut s, out) = parse.parse(s)?;
+
+        s.next_fragment = rest.next_fragment;
+
+        Ok((s, out))
+    }
 }
 
 pub fn alt<Parse, AltParse, Error, Output, AltOutput, Fragment: Clone>(

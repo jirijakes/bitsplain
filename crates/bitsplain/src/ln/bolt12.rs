@@ -1,14 +1,9 @@
 use bytes::Bytes;
-use nom::bytes::complete::tag;
-use nom::combinator::{cond, peek, recognize, value, verify};
-use nom::multi::length_count;
-use nom::sequence::preceded;
-use nom::InputTake;
 
 use crate::bitcoin::PublicKey;
 use crate::dsl::{ann, auto};
-use crate::nom::combinator::success;
-use crate::nom::multi::{length_value, many0};
+use crate::nom::combinator::{peek, verify};
+use crate::nom::multi::{length_count, many0};
 use crate::nom::number::complete::*;
 use crate::parse::*;
 use crate::types::*;
@@ -146,23 +141,21 @@ pub fn tlv_record(s: Span) -> Parsed<Offer> {
     let (s, typ) = parse(u8, ann("Type", auto()))(s)?;
     let (s, length) = parse(u8, ann("Length", auto()))(s)?;
 
-    // TODO: extract into `length_value` equivalent.
-    let (s, rest) = s.take_split(length.into());
-
-    let (mut s, value) = parse(
-        match typ {
-            2 => offer_chain_hashes,
-            6 => currency,
-            10 => description,
-            16 => paths,
-            18 => issuer,
-            22 => offer_node_id,
-            _ => other,
-        },
-        ann("Value", auto()),
+    let (s, value) = parse_slice(
+        length,
+        parse(
+            match typ {
+                2 => offer_chain_hashes,
+                6 => currency,
+                10 => description,
+                16 => paths,
+                18 => issuer,
+                22 => offer_node_id,
+                _ => other,
+            },
+            ann("Value", auto()),
+        ),
     )(s)?;
-
-    s.next_fragment = rest.next_fragment;
 
     let annotation = match typ {
         2 => "Offer chains",
