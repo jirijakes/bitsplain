@@ -68,7 +68,7 @@ pub struct Annotated<Fragment> {
     /// Offset of byte to be parsed next.
     next_offset: usize,
     /// Fragment (raw data) to be parsed next.
-    next_fragment: Fragment,
+    pub(crate) next_fragment: Fragment,
     /// Tree of annotations.
     tree: Vec<Node>,
     /// Most recently inserted range. None if no range inserted yet.
@@ -545,6 +545,19 @@ where
         };
         Ok((next_span, out))
     }
+}
+
+pub fn parse_slice<'a, Annotation, Parse, Error, Output, Fragment>(
+    length: usize,
+    mut parse: Parse,
+    ann: Annotation,
+) -> impl FnMut(Annotated<Fragment>) -> IResult<Annotated<Fragment>, Output, Error> + 'a
+where
+    Parse: Parser<Annotated<Fragment>, Output, Error> + 'a,
+    Error: ParseError<Annotated<Fragment>>,
+    Annotation: Borrow<Ann<Output>> + 'a,
+{
+    move |mut input: Annotated<Fragment>| todo!()
 }
 
 pub fn alt<Parse, AltParse, Error, Output, AltOutput, Fragment: Clone>(

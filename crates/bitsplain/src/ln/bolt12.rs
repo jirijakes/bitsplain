@@ -14,13 +14,15 @@ use crate::parse::*;
 use crate::types::*;
 use crate::value::{ToValue, Value};
 
+use super::{short_channel_id, ShortChannelId};
+
 #[derive(Debug, Clone)]
 pub enum Offer {
     ChainHashes(Vec<ChainHash>),
     Description(String),
     Issuer(String),
     Currency(String),
-    Paths(Vec<String>),
+    Paths,
     Other(Bytes),
     PublicKey(PublicKey),
 }
@@ -32,7 +34,7 @@ impl ToValue for Offer {
             Offer::Description(s) => Value::text(s),
             Offer::Issuer(s) => Value::text(s),
             Offer::Currency(s) => Value::text(s),
-            Offer::Paths(ps) => Value::text(format!("{:?}", ps)),
+            Offer::Paths => Value::Nil,
             Offer::Other(b) => Value::bytes(b.to_vec()),
             Offer::PublicKey(pk) => pk.to_value(),
         }
@@ -79,37 +81,60 @@ pub fn offer_node_id(s: Span) -> Parsed<Offer> {
 
 #[derive(Debug)]
 pub enum ScidOrPublicKey {
-    Scid(Vec<u8>),
+    Scid(ShortChannelId),
     PublicKey(PublicKey),
 }
 
+impl ToValue for ScidOrPublicKey {
+    fn to_value(&self) -> Value {
+        match self {
+            ScidOrPublicKey::Scid(scid) => scid.to_value(),
+            ScidOrPublicKey::PublicKey(pk) => pk.to_value(),
+        }
+    }
+}
+
 fn scid(s: Span) -> Parsed<ScidOrPublicKey> {
-    let (s, dir) = parse(verify(u8, |v| *v == 0 || *v == 1), ann("xxx", auto()))(s)?;
-    let (s, scid) = bytes(9usize)(s)?;
+    let (s, _) = parse(
+        verify(u8, |v| *v == 0 || *v == 1),
+        ann("Refers to", |v: &u8| {
+            if *v == 0 {
+                Value::num(0)
+            } else if *v == 1 {
+                Value::num(1)
+            } else {
+                unreachable!()
+            }
+        }),
+    )(s)?;
+    let (s, scid) = short_channel_id(s)?;
     Ok((s, ScidOrPublicKey::Scid(scid)))
 }
 
 fn pk(s: Span) -> Parsed<ScidOrPublicKey> {
     let (s, _) = verify(peek(u8), |v| *v == 2 || *v == 3)(s)?;
-    let (s, pk) = parse(public_key, ann("XXX", auto()))(s)?;
+    let (s, pk) = parse(public_key, ann("First node ID", auto()))(s)?;
     Ok((s, ScidOrPublicKey::PublicKey(pk)))
 }
 
-fn onionmsg_hop(s: Span) -> Parsed<(PublicKey, Vec<u8>)> {
-    let (s, blinded_node_id) = parse(public_key, ann("prdel", auto()))(s)?;
-    let (s, enclen) = be_u16(s)?;
-    let (s, data) = bytes(enclen)(s)?;
-    Ok((s, (blinded_node_id, data)))
+fn onionmsg_hop(s: Span) -> Parsed<()> {
+    let (s, _) = parse(public_key, ann("Blinded node ID", auto()))(s)?;
+    let (s, enclen) = parse(be_u16, ann("Length of encrypted data", auto()))(s)?;
+    let (s, _) = parse(bytes(enclen), ann("Encrypted data", auto()))(s)?;
+    Ok((s, ()))
 }
 
 pub fn paths(s: Span) -> Parsed<Offer> {
-    let (s, scid_or_pk) = nom::branch::alt((scid, pk))(s)?;
-    let (s, blinding) = parse(public_key, ann("YYY", Value::text("aaaa")))(s)?;
-    let (s, hops) = parse(
-        length_count(u8, parse(onionmsg_hop, ann("cibul", "voni"))),
-        ann("hovno", "smrdi"),
+    let (s, _) = nom::branch::alt((scid, pk))(s)?;
+    let (s, _) = parse(public_key, ann("Blinding", auto()))(s)?;
+    let (s, _) = parse(
+        length_count(
+            parse(u8, ann("Number of hops", auto())),
+            parse(with("list", "enumerate", onionmsg_hop), ann("Hop", auto())),
+        ),
+        ann("Hops", Value::Nil),
     )(s)?;
-    Ok((s, Offer::Paths(vec![])))
+    Ok((s, Offer::Paths))
 }
 
 pub fn other(s: Span) -> Parsed<Offer> {
@@ -120,30 +145,24 @@ pub fn other(s: Span) -> Parsed<Offer> {
 pub fn tlv_record(s: Span) -> Parsed<Offer> {
     let (s, typ) = parse(u8, ann("Type", auto()))(s)?;
     let (s, length) = parse(u8, ann("Length", auto()))(s)?;
+
+    // TODO: extract into `length_value` equivalent.
     let (s, rest) = s.take_split(length.into());
 
-    println!("\n1. {:?}\n", s);
-    println!("\n\n2. {:?}\n\n", rest);
+    let (mut s, value) = parse(
+        match typ {
+            2 => offer_chain_hashes,
+            6 => currency,
+            10 => description,
+            16 => paths,
+            18 => issuer,
+            22 => offer_node_id,
+            _ => other,
+        },
+        ann("Value", auto()),
+    )(s)?;
 
-    let (s, value) = parse(paths, ann("Prd", "xxx"))(s)?;
-
-    println!("\n3. {:?}\n", s);
-
-    // let (s, value) = parse(
-    // length_value(
-    //     success(length),
-    //     parse(paths, ann("Prd", "xxx"))// match typ {
-    //            // 2 => offer_chain_hashes,
-    //            // 6 => currency,
-    //            // 10 => description,
-    //            // 16 => ,
-    //            // 18 => issuer,
-    //            // 22 => offer_node_id,
-    //            // _ => unimplemented!() // parse(other, ann("???", Value::text("..."))),
-    //            // },
-    // ),
-    // ann("ZZZ", Value::text("UUU")),
-    // )(s)?;
+    s.next_fragment = rest.next_fragment;
 
     let annotation = match typ {
         2 => "Offer chains",

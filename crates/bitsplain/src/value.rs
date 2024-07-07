@@ -143,6 +143,12 @@ pub trait ToValue {
     fn to_value(&self) -> Value;
 }
 
+impl ToValue for () {
+    fn to_value(&self) -> Value {
+        Value::Nil
+    }
+}
+
 impl ToValue for i32 {
     fn to_value(&self) -> Value {
         Value::Num(*self as i128)
