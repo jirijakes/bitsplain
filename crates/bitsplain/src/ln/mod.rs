@@ -1,3 +1,6 @@
+use nom::combinator::{map, success};
+use nom::number::complete::{be_u32, be_u64};
+
 use crate::dsl::{ann, auto};
 use crate::nom::number::complete::{be_u16, be_u24, u8};
 use crate::parse::*;
@@ -6,6 +9,16 @@ use crate::*;
 
 pub mod bolt12;
 pub mod gossip;
+
+pub fn bigsize(s: Span) -> Parsed<u64> {
+    let (s, first) = u8(s)?;
+    match first {
+        0xFF => be_u64(s),
+        0xFE => map(be_u32, |n| n as u64)(s),
+        0xFD => map(be_u16, |n| n as u64)(s),
+        n => success(n as u64)(s),
+    }
+}
 
 /// Internal representation of short channel ID (SCID). Crate `lightning` normally
 /// uses `u64` representation to which `ShortChannelId` can be converted.

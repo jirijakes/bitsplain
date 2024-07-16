@@ -557,11 +557,15 @@ pub fn parse_slice<'a, Parse, Error, Output, Fragment, Length>(
 where
     Parse: Parser<Annotated<Fragment>, Output, Error> + 'a,
     Error: ParseError<Annotated<Fragment>>,
-    Length: Into<usize> + Copy + 'a,
+    Length: TryInto<usize> + Copy + 'a,
     Annotated<Fragment>: InputTake + Slice<RangeFrom<usize>> + Slice<RangeTo<usize>>,
 {
     move |input: Annotated<Fragment>| {
-        let (s, rest) = input.take_split(length.into());
+        let (s, rest) = input.take_split(
+            length
+                .try_into()
+                .unwrap_or_else(|_| panic!("Cannot run this on smaller than 64bit platform.")),
+        );
         let (mut s, out) = parse.parse(s)?;
 
         s.next_fragment = rest.next_fragment;
