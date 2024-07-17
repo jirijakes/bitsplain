@@ -68,7 +68,7 @@ pub struct Annotated<Fragment> {
     /// Offset of byte to be parsed next.
     next_offset: usize,
     /// Fragment (raw data) to be parsed next.
-    next_fragment: Fragment,
+    pub(crate) next_fragment: Fragment,
     /// Tree of annotations.
     tree: Vec<Node>,
     /// Most recently inserted range. None if no range inserted yet.
@@ -387,7 +387,7 @@ where
 
     #[inline]
     fn take_split(&self, count: usize) -> (Self, Self) {
-        (self.slice(count..), self.slice(..count))
+        (self.slice(..count), self.slice(count..))
     }
 }
 
@@ -544,6 +544,33 @@ where
             last_range: Some((from, to)),
         };
         Ok((next_span, out))
+    }
+}
+
+/// Applies `parse` to only first `length` bytes. It is similar to nom's `length_value`, however
+/// it returns span produce by `parse` (nom's `length_value` returns span of the rest and therefore
+/// all annotations produced by `parse` were lost).
+pub fn parse_slice<'a, Parse, Error, Output, Fragment, Length>(
+    length: Length,
+    mut parse: Parse,
+) -> impl FnMut(Annotated<Fragment>) -> IResult<Annotated<Fragment>, Output, Error> + 'a
+where
+    Parse: Parser<Annotated<Fragment>, Output, Error> + 'a,
+    Error: ParseError<Annotated<Fragment>>,
+    Length: TryInto<usize> + Copy + 'a,
+    Annotated<Fragment>: InputTake + Slice<RangeFrom<usize>> + Slice<RangeTo<usize>>,
+{
+    move |input: Annotated<Fragment>| {
+        let (s, rest) = input.take_split(
+            length
+                .try_into()
+                .unwrap_or_else(|_| panic!("Cannot run this on smaller than 64bit platform.")),
+        );
+        let (mut s, out) = parse.parse(s)?;
+
+        s.next_fragment = rest.next_fragment;
+
+        Ok((s, out))
     }
 }
 
