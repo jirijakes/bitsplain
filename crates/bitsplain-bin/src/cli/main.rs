@@ -1,7 +1,7 @@
 use std::io::{Read, Write};
 use std::path::PathBuf;
 
-use bitsplain::decode::{all_decoders, decode_input, Input};
+use bitsplain::decode::{all_decoders, decode_input, input_to_binaries, Input};
 use bitsplain_format::*;
 use clap::Parser;
 
@@ -18,6 +18,22 @@ fn main() {
             .iter()
             .enumerate()
             .for_each(|(i, d)| println!("{:#2}. [{}/{}] {}", i + 1, d.group, d.symbol, d.title));
+        return;
+    }
+
+    let input: Input = args
+        .input
+        .map(Input::String)
+        .or_else(|| args.file.map(read_file).map(|b| Input::Binary(b.into())))
+        .unwrap_or_else(|| Input::Binary(read_stdin().into()));
+
+    if args.print_hex {
+        input_to_binaries(input).iter().take(1).for_each(|bin| {
+            let mut out = std::io::stdout();
+            let mut printer = hexyl::PrinterBuilder::new(&mut out).build();
+            let _ = printer.print_all(bin.as_ref());
+        });
+
         return;
     }
 
@@ -50,12 +66,6 @@ fn main() {
         settings,
         params: args.params.iter().collect(),
     };
-
-    let input: Input = args
-        .input
-        .map(Input::String)
-        .or_else(|| args.file.map(read_file).map(|b| Input::Binary(b.into())))
-        .unwrap_or_else(|| Input::Binary(read_stdin().into()));
 
     decode_input(input)
         .into_iter()

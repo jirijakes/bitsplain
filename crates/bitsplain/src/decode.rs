@@ -99,7 +99,7 @@ pub fn decode_binaries(binaries: Vec<Binary>) -> Vec<Candidate> {
 /// The results are ordered from more likely to less likely, i. e.
 /// since Base16 may also be a valid Base64, the decoded Base16
 /// will preceed the other.
-fn input_to_binaries(input: Input) -> Vec<Binary> {
+pub fn input_to_binaries(input: Input) -> Vec<Binary> {
     match input {
         Input::String(s) => try_decode_string(&s),
         Input::Binary(b) => {

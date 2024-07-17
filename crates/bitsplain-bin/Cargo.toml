@@ -18,6 +18,7 @@ config = "0.13.4"
 dirs = "5.0.1"
 gtk = { package = "gtk4", version = "0.7.3" }
 hex = "0.4.3"
+hexyl = "0.14.0"
 human-size = "0.4.3"
 lazy_static = "1.4.0"
 pretty = { version = "0.12.3", features = ["termcolor"] }

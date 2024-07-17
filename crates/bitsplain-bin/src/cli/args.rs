@@ -25,6 +25,10 @@ pub struct Args {
     /// Show all known decoders
     pub list_decoders: bool,
 
+    #[arg(long, default_value = "false")]
+    /// Hex dump raw bytes
+    pub print_hex: bool,
+
     /// Do not show documentation strings
     #[arg(long)]
     pub show_doc: Option<bool>,
