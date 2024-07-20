@@ -73,11 +73,11 @@ pub fn block_header(s: Span) -> Parsed<()> {
 
     // TODO: The condition is here only to ensure that parsing of non-block header data does not fail.
     // Might be improved by preconditions or other sort of validations.
-    if block_header.target().difficulty() > 0 {
+    if block_header.target().difficulty(Network::Bitcoin) > 0 {
         s.insert(
             ann(
                 "Difficulty",
-                Value::Num(i128::try_from(block_header.difficulty()).unwrap()),
+                Value::Num(i128::try_from(block_header.difficulty(Network::Bitcoin)).unwrap()),
             )
             .www("https://en.bitcoin.it/wiki/Difficulty")
             .doc("Measure of how difficult it is to find a hash below a given target. "),

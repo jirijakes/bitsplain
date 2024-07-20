@@ -113,7 +113,7 @@ pub fn tx_out(s: Span) -> Parsed<TxOut> {
             doc: None,
         })
         .add_tag_cond(
-            !script.is_op_return() && script.dust_value() == value.amount(),
+            !script.is_op_return() && script.minimal_non_dust() == value.amount(),
             Tag {
                 label: "DUST".to_string(),
                 color: None,
@@ -387,12 +387,12 @@ pub fn tx(s: Span) -> Parsed<Transaction> {
     };
     s.insert_at(
         &bm2,
-        ann("Txid", Value::Hash(tx.txid().to_raw_hash()))
+        ann("Txid", Value::Hash(tx.compute_txid().to_raw_hash()))
             .doc("ID of this transaction as defined pre-segwit."),
     );
     s.insert_at(
         &bm2,
-        ann("Wtxid", Value::Hash(tx.wtxid().to_raw_hash()))
+        ann("Wtxid", Value::Hash(tx.compute_txid().to_raw_hash()))
             .doc("Segwit-aware ID of this transaction."),
     );
     s.insert_at(&bm2, ann("Size", Value::Size(tx.base_size() as u64)));
