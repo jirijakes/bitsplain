@@ -8,7 +8,7 @@ description = "Output format for bitsplain, library explaining Bitcoin-related b
 keywords = ["bitcoin", "binary", "parsing", "image"]
 
 [dependencies]
-clap = { version = "4.5.4", features = ["derive"] }
-serde = { version = "1.0.201", features = ["derive"] }
+clap = { version = "4.5.9", features = ["derive"] }
+serde = { version = "1.0.204", features = ["derive"] }
 termion = "3.0.0"
-thiserror = "1.0.60"
+thiserror = "1.0.63"

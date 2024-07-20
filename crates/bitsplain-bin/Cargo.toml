@@ -12,7 +12,7 @@ bitsplain = { version = "0.1.0-alpha.2", path = "../bitsplain" }
 bitsplain_format = { version = "0.1.0-alpha.2", path = "../bitsplain-format" }
 bitsplain_format_html = { version = "0.1.0-alpha.2", path = "../bitsplain-format-html" }
 bitsplain_format_image = { version = "0.1.0-alpha.2", path = "../bitsplain-format-image" }
-clap = { version = "4.5.4", features = ["derive"] }
+clap = { version = "4.5.9", features = ["derive"] }
 # colors-transform = "0.2.11"
 config = "0.13.4"
 dirs = "5.0.1"
@@ -20,12 +20,12 @@ gtk = { package = "gtk4", version = "0.7.3" }
 hex = "0.4.3"
 hexyl = "0.14.0"
 human-size = "0.4.3"
-lazy_static = "1.4.0"
+lazy_static = "1.5.0"
 pretty = { version = "0.12.3", features = ["termcolor"] }
 print_bytes = "1.2.0"
 relm4 = "0.7.1"
 # resvg = "0.32.0"
-serde = { version = "1.0.201", features = ["derive"] }
+serde = { version = "1.0.204", features = ["derive"] }
 # svg = "0.13.1"
 termion = "3.0.0"
 time = { version = "0.3.36", features = ["formatting"] }
