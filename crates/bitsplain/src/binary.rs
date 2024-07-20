@@ -2,6 +2,8 @@
 
 use std::ops::Deref;
 
+use bech32::primitives::decode::CheckedHrpstring;
+use bech32::NoChecksum;
 use bytes::Bytes;
 
 /// Binary data with information about their origin.
@@ -50,13 +52,9 @@ pub fn string_to_base58(s: &str) -> Option<Binary> {
 
 /// Attempt to decode string as Bech32-encoded string without checksum.
 pub fn string_to_bech32(s: &str) -> Option<Binary> {
-    bech32::decode_without_checksum(s)
+    CheckedHrpstring::new::<NoChecksum>(s)
         .ok()
-        .and_then(|(hrp, data)| {
-            bech32::convert_bits(&data, 5, 8, false)
-                .ok()
-                .map(|data| Binary::Bech32(hrp, data.into()))
-        })
+        .map(|ch| Binary::Bech32(ch.hrp().to_string(), ch.byte_iter().collect()))
 }
 
 /// Attempt to decode raw byets as string.
