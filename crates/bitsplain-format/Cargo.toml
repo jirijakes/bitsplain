@@ -10,5 +10,5 @@ keywords = ["bitcoin", "binary", "parsing", "image"]
 [dependencies]
 clap = { version = "4.5.9", features = ["derive"] }
 serde = { version = "1.0.204", features = ["derive"] }
-termion = "3.0.0"
+termion = "4.0.2"
 thiserror = "1.0.63"

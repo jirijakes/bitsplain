@@ -31,7 +31,7 @@ fn main() {
         input_to_binaries(input).iter().take(1).for_each(|bin| {
             let mut out = std::io::stdout();
             let mut printer = hexyl::PrinterBuilder::new(&mut out).build();
-            let _ = printer.print_all(bin.as_ref());
+            let _ = printer.print_all::<&[u8]>(bin.as_ref());
         });
 
         return;
